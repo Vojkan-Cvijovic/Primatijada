@@ -1,0 +1,2 @@
+# Primatijada
+Primatijada - school project
