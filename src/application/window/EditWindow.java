@@ -1,20 +1,18 @@
 package application.window;
 
 import java.awt.EventQueue;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 import javax.swing.ButtonGroup;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
+import javax.swing.JButton;
 import javax.swing.JLabel;
-import javax.swing.JTextField;
+import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JSeparator;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
-import javax.swing.JButton;
+import javax.swing.JTextField;
 
-public class SignUpWindow extends Window {
-	
+public class EditWindow extends Window {
 
 	private WindowController windowController;
 	private JTextField indeksInput;
@@ -27,27 +25,11 @@ public class SignUpWindow extends Window {
 	private int optionInputWidth = SHORT_OPTION_WIDTH;
 	private static final String SPORT_LABEL = "Sport";
 	private static final String PAPERWORK_LABEL = "Rad";
-	private final ButtonGroup arrangementButtonGroup = new ButtonGroup();
-
-	/**
-	 * Launch the application.
-	 */
-	public void run() {
-		EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				try {
-					frame.setVisible(true);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		});
-	}
 
 	/**
 	 * Create the application.
 	 */
-	public SignUpWindow(WindowController windowController) {
+	public EditWindow(WindowController windowController) {
 		this.windowController = windowController;
 		initialize();
 	}
@@ -57,29 +39,24 @@ public class SignUpWindow extends Window {
 	 */
 	private void initialize() {
 		/*
-		frame = new JFrame();
-		frame.setResizable(false);
-		frame.setTitle("Pritijada");
-		frame.setBounds(100, 100, 600, 380);
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.getContentPane().setLayout(null);
-		*/
-
+		 * ------------------- frame = new JFrame(); frame.setResizable(false);
+		 * frame.setTitle("Primatijada"); frame.setBounds(100, 100, 600, 480);
+		 * frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		 * frame.getContentPane().setLayout(null);
+		 * 
+		 * // --------------------
+		 */
 
 		final JLabel optionLabel = new JLabel("");
 		final JPanel optionInputPanel = new JPanel();
 		optionInput = new JTextField();
 
 		JPanel indeksPanel = new JPanel();
-		indeksPanel.setBounds(95, 39, 83, 29);
+		indeksPanel.setBounds(140, 39, 83, 29);
 		frame.getContentPane().add(indeksPanel);
 
 		JLabel indeksLabel = new JLabel("Indeks");
 		indeksPanel.add(indeksLabel);
-
-		JLabel lblNewLabel = new JLabel("Prijava");
-		lblNewLabel.setBounds(24, 12, 70, 15);
-		frame.getContentPane().add(lblNewLabel);
 
 		JPanel indeksInputPanel = new JPanel();
 		indeksInputPanel.setBounds(256, 39, 183, 29);
@@ -90,7 +67,7 @@ public class SignUpWindow extends Window {
 		indeksInput.setColumns(10);
 
 		JPanel categoryPanel = new JPanel();
-		categoryPanel.setBounds(256, 139, 280, 29);
+		categoryPanel.setBounds(256, 110, 280, 29);
 		frame.getContentPane().add(categoryPanel);
 
 		buttonGroup = new ButtonGroup();
@@ -139,83 +116,52 @@ public class SignUpWindow extends Window {
 		frame.getContentPane().add(separator);
 
 		JPanel categoryLabelPanel = new JPanel();
-		categoryLabelPanel.setBounds(95, 131, 103, 29);
+		categoryLabelPanel.setBounds(120, 110, 103, 29);
 		frame.getContentPane().add(categoryLabelPanel);
 
 		JLabel categoryLabel = new JLabel("Kategorija");
 		categoryLabelPanel.add(categoryLabel);
 
 		JPanel optionLabelPanel = new JPanel();
-		optionLabelPanel.setBounds(105, 180, 103, 21);
+		optionLabelPanel.setBounds(95, 164, 103, 21);
 		frame.getContentPane().add(optionLabelPanel);
 
 		optionLabelPanel.add(optionLabel);
 		optionLabel.setVisible(showOptions);
 
-		optionInputPanel.setBounds(223, 180, 316, 29);
+		optionInputPanel.setBounds(242, 156, 316, 29);
 		frame.getContentPane().add(optionInputPanel);
 
 		optionInputPanel.add(optionInput);
 		optionInput.setColumns(optionInputWidth);
 		optionInput.setVisible(showOptions);
 
-		JPanel aranzmanPanel = new JPanel();
-		aranzmanPanel.setBounds(95, 90, 103, 29);
-		frame.getContentPane().add(aranzmanPanel);
+		JButton backButton = new JButton("Nazad");
 
-		JLabel aranzmanLabel = new JLabel("Aranzman");
-		aranzmanPanel.add(aranzmanLabel);
+		backButton.setBounds(30, 13, 83, 25);
+		frame.getContentPane().add(backButton);
+		backButton.addActionListener(windowController);
 
-		JPanel aranzmanOptionPanel = new JPanel();
-		aranzmanOptionPanel.setBounds(258, 99, 183, 28);
-		frame.getContentPane().add(aranzmanOptionPanel);
+		JPanel panel = new JPanel();
+		panel.setBounds(245, 234, 223, 39);
+		frame.getContentPane().add(panel);
 
-		JRadioButton arrangementOptionRB_1 = new JRadioButton("Ceo");
-		arrangementOptionRB_1.setSelected(true);
-		arrangementButtonGroup.add(arrangementOptionRB_1);
-		aranzmanOptionPanel.add(arrangementOptionRB_1);
+		JButton updateButton = new JButton("Izmeni");
+		panel.add(updateButton);
 
-		JRadioButton arrangementOptionRB_2 = new JRadioButton("Pola");
-		arrangementButtonGroup.add(arrangementOptionRB_2);
-		aranzmanOptionPanel.add(arrangementOptionRB_2);
+	}
 
-		JPanel signupPanel = new JPanel();
-		signupPanel.setBounds(353, 258, 183, 45);
-		frame.getContentPane().add(signupPanel);
-
-		JButton signupButton = new JButton("Prijavi se!");
-		signupButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				// sign up
-
+	@Override
+	public void run() {
+		EventQueue.invokeLater(new Runnable() {
+			public void run() {
+				try {
+					frame.setVisible(true);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 			}
 		});
-		signupPanel.add(signupButton);
-
-		JPanel priceLabelPanel = new JPanel();
-		priceLabelPanel.setBounds(35, 258, 56, 29);
-		frame.getContentPane().add(priceLabelPanel);
-
-		JLabel lblNewLabel_2 = new JLabel("Cena :");
-		priceLabelPanel.add(lblNewLabel_2);
-
-		JPanel priceOutputPanel = new JPanel();
-		priceOutputPanel.setBounds(72, 258, 136, 29);
-		frame.getContentPane().add(priceOutputPanel);
-
-		JLabel priceOutput = new JLabel("110 $");
-		priceOutputPanel.add(priceOutput);
-
-		JButton callOffButton = new JButton("Odjava");
-		callOffButton.addActionListener(windowController);
-		callOffButton.setBounds(501, 12, 83, 25);
-		frame.getContentPane().add(callOffButton);
-		
-		JButton edit = new JButton("Izmeni");
-		edit.addActionListener(windowController);
-		edit.setBounds(501, 43, 83, 25);
-		frame.getContentPane().add(edit);
-
 	}
 
 	public void hide() {

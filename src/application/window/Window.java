@@ -20,5 +20,6 @@ public abstract class Window {
 		frame.getContentPane().setLayout(null);
 		
 	}
+	abstract public void run();
 
 }
