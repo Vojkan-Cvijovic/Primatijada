@@ -8,29 +8,25 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.JButton;
 
-import application.exception.RecordNotExistsException;
-import application.model.Primatijada;
 import application.service.PrimatijadaService;
 
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
-
-
-import com.ibm.db2.jcc.am.de;
 
 public class CallOffWindow extends Window {
 
 	private WindowController windowController;
 	private JFrame frame;
 	private JTextField indeksInput;
-	
-	public CallOffWindow(WindowController windowController, PrimatijadaService service) {
+
+	public CallOffWindow(WindowController windowController,
+			PrimatijadaService service) {
 		this.windowController = windowController;
 		initialize();
 	}
-	
-	public void run(){
-		
+
+	public void run() {
+
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
@@ -46,11 +42,11 @@ public class CallOffWindow extends Window {
 	 * Initialize the contents of the frame.
 	 */
 	private void initialize() {
-		
-		/* 
+
+		/*
 		 * Initializing base frame
 		 */
-		
+
 		frame = new JFrame();
 		frame.setResizable(false);
 		frame.setTitle(TITLE);
@@ -72,7 +68,7 @@ public class CallOffWindow extends Window {
 		JPanel indeksInputPanel = new JPanel();
 		indeksInputPanel.setBounds(346, 80, 183, 29);
 		frame.getContentPane().add(indeksInputPanel);
-		
+
 		indeksInput = new JTextField();
 		indeksInputPanel.add(indeksInput);
 		indeksInput.setColumns(10);
@@ -85,22 +81,20 @@ public class CallOffWindow extends Window {
 		btnNewButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				/* For Future development */
-				
-				/* When this method is envoked, it should pass to service indeks,
-				 * and catch potentioal exceptions
+
+				/*
+				 * When this method is envoked, it should pass to service
+				 * indeks, and catch potential exceptions
 				 */
 
 				String indeks = indeksInput.getText();
-				
-				try{
-					service.deleteRecord(indeks);	
+
+				try {
+					service.deleteRecord(indeks);
 				} catch (NumberFormatException e1) {
 					System.out.println("ERROR: Indeks not valid");
-				} catch (RecordNotExistsException e1) {
-					System.out.println("ERROR: Indeks not found");
 				}
-				
-				
+
 				System.out.println("Odjavi se");
 			}
 		});
@@ -120,7 +114,7 @@ public class CallOffWindow extends Window {
 
 	public void hide() {
 		frame.setVisible(false);
-		
+
 	}
 
 }

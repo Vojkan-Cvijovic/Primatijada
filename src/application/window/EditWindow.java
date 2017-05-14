@@ -4,7 +4,6 @@ import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Enumeration;
-
 import javax.swing.AbstractButton;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
@@ -14,9 +13,6 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JSeparator;
 import javax.swing.JTextField;
-
-import com.ibm.db2.jcc.am.de;
-
 import application.exception.RecordNotExistsException;
 import application.service.PrimatijadaService;
 
@@ -50,8 +46,8 @@ public class EditWindow extends Window {
 	 * Initialize the contents of the frame.
 	 */
 	private void initialize() {
-		
-		/* 
+
+		/*
 		 * Initializing base frame
 		 */
 
@@ -81,9 +77,10 @@ public class EditWindow extends Window {
 		indeksInput = new JTextField();
 		indeksInput.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				
-				/* when indeksInput textField is filled and pressed Enter 
-				 * this method is invoked, it displays db data for screen
+
+				/*
+				 * when indeksInput textField is filled and pressed Enter this
+				 * method is invoked, it displays db data for screen
 				 */
 
 				String tag = null;
@@ -102,11 +99,12 @@ public class EditWindow extends Window {
 
 					if (button.getText().equalsIgnoreCase(tag)) {
 						button.setSelected(true);
-						if(tag.equalsIgnoreCase(SPORT_LABEL))
+						if (tag.equalsIgnoreCase(SPORT_LABEL))
 							sportOption();
-						else if(tag.equalsIgnoreCase(PAPERWORK_LABEL))
+						else if (tag.equalsIgnoreCase(PAPERWORK_LABEL))
 							scienceOption();
-						else defaultOption();
+						else
+							defaultOption();
 					}
 				}
 
@@ -188,13 +186,15 @@ public class EditWindow extends Window {
 		JButton updateButton = new JButton("Izmeni");
 		updateButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				
-				/* This button is invoked when Izmeni button is pressed
-				 * and it picks up all data from input and sends it to service
+
+				/*
+				 * This button is invoked when Izmeni button is pressed and it
+				 * picks up all data from input and sends it to service
 				 */
 
 				String indeks = indeksInput.getText();
 				String category = null;
+				String options = optionInput.getText();
 
 				for (Enumeration<AbstractButton> buttons = buttonGroup
 						.getElements(); buttons.hasMoreElements();) {
@@ -205,7 +205,7 @@ public class EditWindow extends Window {
 				}
 				// Validation
 				try {
-					service.updateRecord(indeks, category);
+					service.updateRecord(indeks, category, options);
 				} catch (NumberFormatException e1) {
 					System.out.println("ERROR: Indeks not valid");
 				} catch (RecordNotExistsException e1) {

@@ -1,7 +1,5 @@
 package application.window;
 
-import javax.swing.JFrame;
-
 import application.service.PrimatijadaService;
 
 public abstract class Window {
