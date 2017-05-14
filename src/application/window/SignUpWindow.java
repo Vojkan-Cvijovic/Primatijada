@@ -2,6 +2,7 @@ package application.window;
 
 import java.awt.EventQueue;
 
+import javax.swing.AbstractButton;
 import javax.swing.ButtonGroup;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -11,11 +12,16 @@ import javax.swing.JRadioButton;
 import javax.swing.JSeparator;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import java.util.Enumeration;
+
 import javax.swing.JButton;
 
-public class SignUpWindow extends Window {
-	
+import application.exception.PrimaryKeyTakenException;
+import application.service.PrimatijadaService;
 
+public class SignUpWindow extends Window {
+
+	private JFrame frame;
 	private WindowController windowController;
 	private JTextField indeksInput;
 	private ButtonGroup buttonGroup;
@@ -27,7 +33,7 @@ public class SignUpWindow extends Window {
 	private int optionInputWidth = SHORT_OPTION_WIDTH;
 	private static final String SPORT_LABEL = "Sport";
 	private static final String PAPERWORK_LABEL = "Rad";
-	private final ButtonGroup arrangementButtonGroup = new ButtonGroup();
+	private ButtonGroup arrangementButtonGroup = new ButtonGroup();
 
 	/**
 	 * Launch the application.
@@ -47,7 +53,9 @@ public class SignUpWindow extends Window {
 	/**
 	 * Create the application.
 	 */
-	public SignUpWindow(WindowController windowController) {
+	public SignUpWindow(WindowController windowController,
+			PrimatijadaService service) {
+		this.service = service;
 		this.windowController = windowController;
 		initialize();
 	}
@@ -56,15 +64,13 @@ public class SignUpWindow extends Window {
 	 * Initialize the contents of the frame.
 	 */
 	private void initialize() {
-		/*
+
 		frame = new JFrame();
 		frame.setResizable(false);
-		frame.setTitle("Pritijada");
+		frame.setTitle("");
 		frame.setBounds(100, 100, 600, 380);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.getContentPane().setLayout(null);
-		*/
-
 
 		final JLabel optionLabel = new JLabel("");
 		final JPanel optionInputPanel = new JPanel();
@@ -135,7 +141,7 @@ public class SignUpWindow extends Window {
 		buttonGroup.add(categoryRB_3);
 
 		JSeparator separator = new JSeparator();
-		separator.setBounds(12, 76, 584, 2);
+		separator.setBounds(12, 76, 572, 2);
 		frame.getContentPane().add(separator);
 
 		JPanel categoryLabelPanel = new JPanel();
@@ -159,25 +165,25 @@ public class SignUpWindow extends Window {
 		optionInput.setColumns(optionInputWidth);
 		optionInput.setVisible(showOptions);
 
-		JPanel aranzmanPanel = new JPanel();
-		aranzmanPanel.setBounds(95, 90, 103, 29);
-		frame.getContentPane().add(aranzmanPanel);
+		JPanel arrangementPanel = new JPanel();
+		arrangementPanel.setBounds(95, 90, 103, 29);
+		frame.getContentPane().add(arrangementPanel);
 
-		JLabel aranzmanLabel = new JLabel("Aranzman");
-		aranzmanPanel.add(aranzmanLabel);
+		JLabel arrangementLabel = new JLabel("Aranzman");
+		arrangementPanel.add(arrangementLabel);
 
-		JPanel aranzmanOptionPanel = new JPanel();
-		aranzmanOptionPanel.setBounds(258, 99, 183, 28);
-		frame.getContentPane().add(aranzmanOptionPanel);
+		JPanel arrangementOptionPanel = new JPanel();
+		arrangementOptionPanel.setBounds(258, 99, 183, 28);
+		frame.getContentPane().add(arrangementOptionPanel);
 
 		JRadioButton arrangementOptionRB_1 = new JRadioButton("Ceo");
 		arrangementOptionRB_1.setSelected(true);
 		arrangementButtonGroup.add(arrangementOptionRB_1);
-		aranzmanOptionPanel.add(arrangementOptionRB_1);
+		arrangementOptionPanel.add(arrangementOptionRB_1);
 
 		JRadioButton arrangementOptionRB_2 = new JRadioButton("Pola");
 		arrangementButtonGroup.add(arrangementOptionRB_2);
-		aranzmanOptionPanel.add(arrangementOptionRB_2);
+		arrangementOptionPanel.add(arrangementOptionRB_2);
 
 		JPanel signupPanel = new JPanel();
 		signupPanel.setBounds(353, 258, 183, 45);
@@ -187,7 +193,34 @@ public class SignUpWindow extends Window {
 		signupButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				// sign up
+				String indeks = indeksInput.getText();
+				String category = null;
+				String arrangement = null;
+				String options = optionInput.getText();
+				
+				for (Enumeration<AbstractButton> buttons = buttonGroup
+						.getElements(); buttons.hasMoreElements();) {
+					AbstractButton button = buttons.nextElement();
 
+					if (button.isSelected())
+						category = button.getText();
+				}
+
+				for (Enumeration<AbstractButton> buttons = arrangementButtonGroup
+						.getElements(); buttons.hasMoreElements();) {
+					AbstractButton button = buttons.nextElement();
+
+					if (button.isSelected())
+						arrangement = button.getText();
+				}
+				
+				try {
+					service.signUp(indeks,category,arrangement,options);
+				} catch (PrimaryKeyTakenException e1) {
+					System.out.println("ERROR: Index is taken");
+				} catch (NumberFormatException e2) {
+					System.out.println("ERROR: Index is not number");
+				}
 			}
 		});
 		signupPanel.add(signupButton);
@@ -210,7 +243,7 @@ public class SignUpWindow extends Window {
 		callOffButton.addActionListener(windowController);
 		callOffButton.setBounds(501, 12, 83, 25);
 		frame.getContentPane().add(callOffButton);
-		
+
 		JButton edit = new JButton("Izmeni");
 		edit.addActionListener(windowController);
 		edit.setBounds(501, 43, 83, 25);

@@ -2,21 +2,25 @@ package application.window;
 
 import java.awt.EventQueue;
 
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.JButton;
+
+import application.service.PrimatijadaService;
+
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 
 public class CallOffWindow extends Window {
 
 	private WindowController windowController;
-
+	private JFrame frame;
 	/**
 	 * Create the application.
 	 */
-	public CallOffWindow(WindowController windowController) {
+	public CallOffWindow(WindowController windowController, PrimatijadaService service) {
 		this.windowController = windowController;
 		initialize();
 	}
@@ -39,6 +43,12 @@ public class CallOffWindow extends Window {
 	 */
 	private void initialize() {
 		
+		frame = new JFrame();
+		frame.setResizable(false);
+		frame.setTitle(TITLE);
+		frame.setBounds(100, 100, WIDTH, HEIGHT);
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.getContentPane().setLayout(null);
 
 		JPanel indeksPanel = new JPanel();
 		indeksPanel.setBounds(187, 80, 83, 29);
@@ -66,7 +76,7 @@ public class CallOffWindow extends Window {
 		JButton btnNewButton = new JButton("Odjavi se");
 		btnNewButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				System.out.println("Odjavis e");
+				System.out.println("Odjavi se");
 			}
 		});
 		panel.add(btnNewButton);

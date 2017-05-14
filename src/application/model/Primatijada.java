@@ -24,10 +24,18 @@ public class Primatijada {
 	private static final String TABLE_NAME = "primatijada";
 	/********* SQL **********/
 
-	private static final String CREATE_TABLE_SQL = "create table " + TABLE_NAME
-			+ " " + "( " + "indeks integer not null, " + "godina smallint, "
-			+ "tip char, " + "sport varchar(20), " + "rad varchar(100), "
-			+ "aranzman char, primary key(indeks, godina)  " + ")";
+	private static final String CREATE_TABLE_SQL = "create table "
+			+ TABLE_NAME
+			+ "( indeks integer not null,"
+			+ " godina smallint not null, tip char, sport varchar(20), rad varchar(100), aranzman char,"
+			+ " primary key(indeks, godina))";
+
+	/*
+	 * "create table " + TABLE_NAME +
+	 * " ( indeks integer not null, godina smallint not null, " +
+	 * "tip char, sport varchar(20), rad varchar(100), " +
+	 * "aranzman char, primary key(indeks, godina))";
+	 */
 	private static final String INSERT_SQL = "insert into " + TABLE_NAME
 			+ " values(?,?,?,?,?,?)";
 	private static final String DELETE_SQL = "delete from " + TABLE_NAME
@@ -36,21 +44,31 @@ public class Primatijada {
 			+ " SET tip = ?, sport = ?, rad = ? where indeks = ?";
 	private static final String EXISTS_SQL = "select * from " + TABLE_NAME
 			+ " where indeks = ?";
+	private static final String RETRIVE_CATEGORY_SQL = "select tip from "
+			+ TABLE_NAME + " t1 where indeks = ? "
+			+ "and not exists ( select * from " + TABLE_NAME
+			+ " t2 where t2.godina > t1.godina ) ";
 
 	public Primatijada() {
+
+		System.out.println("Creating Primatijada");
 
 		connectionManager = new ConnectionManager();
 		Connection connection = connectionManager.connect();
 		try {
-			DatabaseMetaData databaseMetaData = connection.getMetaData();
-			ResultSet tables = databaseMetaData.getTables(null, null,
-					TABLE_NAME, null);
-			if (!tables.next())
-				createTable(connection);
+			Statement statement = connection.createStatement();
+			statement.execute("select * from " + TABLE_NAME);
 
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			if (e.getErrorCode() == -204)
+				try {
+					createTable(connection);
+				} catch (SQLException e1) {
+					System.out.println("Create table fail");
+					e1.printStackTrace();
+				}
+			else
+				e.printStackTrace();
 		} finally {
 			connectionManager.disconnect();
 		}
@@ -58,6 +76,7 @@ public class Primatijada {
 	}
 
 	private void initialize() {
+		System.out.println("initializing Prmatijada");
 		indeks = 0;
 		godina = 0;
 		tip = 's';
@@ -67,11 +86,15 @@ public class Primatijada {
 	}
 
 	private void createTable(Connection connection) throws SQLException {
+
+		System.out.println("creating table");
 		try {
 			Statement statement = connection.createStatement();
 			statement.executeUpdate(CREATE_TABLE_SQL);
+			System.out.println("Table is created");
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
+			System.out.println("Error while creating table Error code "
+					+ e.getErrorCode());
 			if (e.getErrorCode() == -911 || e.getErrorCode() == -913) {
 
 				connection.rollback();
@@ -83,6 +106,7 @@ public class Primatijada {
 	}
 
 	public void insert() throws PrimaryKeyTakenException {
+		System.out.println("Insert primatijada sa indeksom " + indeks);
 		Connection connection = connectionManager.connect();
 
 		try {
@@ -95,7 +119,10 @@ public class Primatijada {
 		}
 	}
 
-	private void insertAction(Connection connection) throws SQLException, PrimaryKeyTakenException {
+	private void insertAction(Connection connection) throws SQLException,
+			PrimaryKeyTakenException {
+
+		System.out.println("Preparing statement for insert");
 
 		try {
 			PreparedStatement preparedStatement = connection
@@ -113,11 +140,11 @@ public class Primatijada {
 		} catch (SQLException e) {
 
 			if (e.getErrorCode() == -911 || e.getErrorCode() == -913) {
-
+				System.out.println("Insert primatijada db busy, again");
 				connection.rollback();
 
 				insertAction(connection);
-			}else if(e.getErrorCode() == -803){
+			} else if (e.getErrorCode() == -803) {
 				throw new PrimaryKeyTakenException();
 			}
 
@@ -137,7 +164,8 @@ public class Primatijada {
 		}
 	}
 
-	private void deleteAction(Connection connection) throws SQLException, RecordNotExistsException {
+	private void deleteAction(Connection connection) throws SQLException,
+			RecordNotExistsException {
 
 		try {
 			PreparedStatement preparedStatement = connection
@@ -151,7 +179,7 @@ public class Primatijada {
 			if (e.getErrorCode() == -911 || e.getErrorCode() == -913) {
 				connection.rollback();
 				deleteAction(connection);
-			}else if(e.getErrorCode() == 100)
+			} else if (e.getErrorCode() == 100)
 				throw new RecordNotExistsException();
 
 		}
@@ -171,7 +199,8 @@ public class Primatijada {
 
 	}
 
-	private void updateAction(Connection connection) throws SQLException, RecordNotExistsException {
+	private void updateAction(Connection connection) throws SQLException,
+			RecordNotExistsException {
 
 		try {
 			PreparedStatement preparedStatement = connection
@@ -188,10 +217,46 @@ public class Primatijada {
 			if (e.getErrorCode() == -911 || e.getErrorCode() == -913) {
 				connection.rollback();
 				updateAction(connection);
-			}else if(e.getErrorCode() == 100)
+			} else if (e.getErrorCode() == 100)
 				throw new RecordNotExistsException();
 		}
 
+	}
+
+	public String retriveCategory(int indeks) throws RecordNotExistsException {
+		Connection connection = connectionManager.connect();
+		String category = null;
+		try {
+			category = retriveCategoryAction(indeks, connection);
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} finally {
+			connectionManager.disconnect();
+		}
+		return category;
+	}
+
+	private String retriveCategoryAction(int indeks, Connection connection)
+			throws SQLException, RecordNotExistsException {
+		String category = null;
+		try {
+			PreparedStatement preparedStatement = connection
+					.prepareStatement(RETRIVE_CATEGORY_SQL);
+
+			preparedStatement.setInt(1, indeks);
+			ResultSet resultSet = preparedStatement.executeQuery();
+			if (resultSet.next())
+				category = resultSet.getString(1);
+
+		} catch (SQLException e) {
+			if (e.getErrorCode() == -911 || e.getErrorCode() == -913) {
+				connection.rollback();
+				category = retriveCategoryAction(indeks, connection);
+			} else if (e.getErrorCode() == 100)
+				throw new RecordNotExistsException();
+		}
+		return category;
 	}
 
 	public int getIndeks() {

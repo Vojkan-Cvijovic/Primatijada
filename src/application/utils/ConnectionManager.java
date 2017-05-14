@@ -24,6 +24,7 @@ public class ConnectionManager {
 	}
 
 	public Connection connect() {
+		
 
 		try {
 			connection = DriverManager.getConnection(URL, USERNAME, PASSWORD);
@@ -31,17 +32,20 @@ public class ConnectionManager {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-
+		System.out.println("Creating connection");
 		return connection;
 
 	}
 
 	public void disconnect() {
+		
+		
 		try {
 			connection.close();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
+		System.out.println("Disconnected");
 	}
 
 }

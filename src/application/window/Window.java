@@ -2,24 +2,17 @@ package application.window;
 
 import javax.swing.JFrame;
 
+import application.service.PrimatijadaService;
+
 public abstract class Window {
 	
-    private static final int WIDTH = 600;
-    private static final int HEIGHT = 380;
-    private static final String TITLE = "Primatijada";
+    protected static final int WIDTH = 600;
+    protected static final int HEIGHT = 380;
+    protected static final String TITLE = "Primatijada";
     
 	protected JFrame frame;
+	protected PrimatijadaService service;
 	
-	public Window() {
-		
-		frame = new JFrame();
-		frame.setResizable(false);
-		frame.setTitle(TITLE);
-		frame.setBounds(100, 100, WIDTH, HEIGHT);
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.getContentPane().setLayout(null);
-		
-	}
 	abstract public void run();
 
 }

@@ -3,10 +3,13 @@ package application.window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import application.service.PrimatijadaService;
+
 public class WindowController implements ActionListener{
 	private CallOffWindow callOffWindow;
 	private SignUpWindow signUpWindow;
 	private EditWindow editWindow;
+	private PrimatijadaService service;
 	
 	private static final String BACK_BUTTON = "Nazad";
 	private static final String CALL_OFF_BUTTON = "Odjava";
@@ -16,10 +19,12 @@ public class WindowController implements ActionListener{
 		initialize();
 	}
 
-	private void initialize() {		
-		callOffWindow = new CallOffWindow(this);
-		signUpWindow = new SignUpWindow(this);
-		editWindow = new EditWindow(this);
+	private void initialize() {
+		service = new PrimatijadaService();
+		callOffWindow = new CallOffWindow(this, service);
+		signUpWindow = new SignUpWindow(this, service);
+		editWindow = new EditWindow(this, service);
+		
 	}
 
 	@Override
