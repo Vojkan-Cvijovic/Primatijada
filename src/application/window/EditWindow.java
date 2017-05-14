@@ -50,6 +50,10 @@ public class EditWindow extends Window {
 	 * Initialize the contents of the frame.
 	 */
 	private void initialize() {
+		
+		/* 
+		 * Initializing base frame
+		 */
 
 		frame = new JFrame();
 		frame.setResizable(false);
@@ -77,17 +81,21 @@ public class EditWindow extends Window {
 		indeksInput = new JTextField();
 		indeksInput.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				
+				/* when indeksInput textField is filled and pressed Enter 
+				 * this method is invoked, it displays db data for screen
+				 */
 
 				String tag = null;
 
 				try {
-					tag = service.retriveCategory(indeksInput.getText());
+					tag = service.retrieveCategory(indeksInput.getText());
 				} catch (NumberFormatException e1) {
 					System.out.println("ERROR: Indeks not valid");
 				} catch (RecordNotExistsException e1) {
 					System.out.println("ERROR: Indeks not found");
 				}
-
+				// searching which button to activate
 				for (Enumeration<AbstractButton> buttons = buttonGroup
 						.getElements(); buttons.hasMoreElements();) {
 					AbstractButton button = buttons.nextElement();
@@ -180,6 +188,10 @@ public class EditWindow extends Window {
 		JButton updateButton = new JButton("Izmeni");
 		updateButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				
+				/* This button is invoked when Izmeni button is pressed
+				 * and it picks up all data from input and sends it to service
+				 */
 
 				String indeks = indeksInput.getText();
 				String category = null;
@@ -191,9 +203,9 @@ public class EditWindow extends Window {
 					if (button.isSelected())
 						category = button.getText();
 				}
-
+				// Validation
 				try {
-					service.updateInfo(indeks, category);
+					service.updateRecord(indeks, category);
 				} catch (NumberFormatException e1) {
 					System.out.println("ERROR: Indeks not valid");
 				} catch (RecordNotExistsException e1) {

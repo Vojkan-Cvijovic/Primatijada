@@ -5,7 +5,7 @@ import application.window.WindowController;
 public class Application {
 
 	/**
-	 * @param args
+	 * Create the application, and runs it.
 	 */
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub

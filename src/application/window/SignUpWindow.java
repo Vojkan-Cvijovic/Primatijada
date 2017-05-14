@@ -24,7 +24,7 @@ public class SignUpWindow extends Window {
 	private JFrame frame;
 	private WindowController windowController;
 	private JTextField indeksInput;
-	private ButtonGroup buttonGroup;
+	private ButtonGroup categoryRadioButtonGroup;
 	private JTextField optionInput;
 
 	private boolean showOptions = false;
@@ -35,9 +35,6 @@ public class SignUpWindow extends Window {
 	private static final String PAPERWORK_LABEL = "Rad";
 	private ButtonGroup arrangementButtonGroup = new ButtonGroup();
 
-	/**
-	 * Launch the application.
-	 */
 	public void run() {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
@@ -50,9 +47,6 @@ public class SignUpWindow extends Window {
 		});
 	}
 
-	/**
-	 * Create the application.
-	 */
 	public SignUpWindow(WindowController windowController,
 			PrimatijadaService service) {
 		this.service = service;
@@ -64,6 +58,10 @@ public class SignUpWindow extends Window {
 	 * Initialize the contents of the frame.
 	 */
 	private void initialize() {
+		
+		/*
+		 * Initializing base frame
+		 */
 
 		frame = new JFrame();
 		frame.setResizable(false);
@@ -83,9 +81,9 @@ public class SignUpWindow extends Window {
 		JLabel indeksLabel = new JLabel("Indeks");
 		indeksPanel.add(indeksLabel);
 
-		JLabel lblNewLabel = new JLabel("Prijava");
-		lblNewLabel.setBounds(24, 12, 70, 15);
-		frame.getContentPane().add(lblNewLabel);
+		JLabel signUpLabel = new JLabel("Prijava");
+		signUpLabel.setBounds(24, 12, 70, 15);
+		frame.getContentPane().add(signUpLabel);
 
 		JPanel indeksInputPanel = new JPanel();
 		indeksInputPanel.setBounds(256, 39, 183, 29);
@@ -98,8 +96,10 @@ public class SignUpWindow extends Window {
 		JPanel categoryPanel = new JPanel();
 		categoryPanel.setBounds(256, 139, 280, 29);
 		frame.getContentPane().add(categoryPanel);
+		
+		/* Creating button group for options radio buttons */
 
-		buttonGroup = new ButtonGroup();
+		categoryRadioButtonGroup = new ButtonGroup();
 
 		JRadioButton categoryRB_1 = new JRadioButton("Navijac");
 		categoryRB_1.addActionListener(new ActionListener() {
@@ -111,7 +111,7 @@ public class SignUpWindow extends Window {
 		});
 		categoryRB_1.setSelected(true);
 		categoryPanel.add(categoryRB_1);
-		buttonGroup.add(categoryRB_1);
+		categoryRadioButtonGroup.add(categoryRB_1);
 
 		JRadioButton categoryRB_2 = new JRadioButton("Sportista");
 		categoryRB_2.addActionListener(new ActionListener() {
@@ -125,7 +125,7 @@ public class SignUpWindow extends Window {
 			}
 		});
 		categoryPanel.add(categoryRB_2);
-		buttonGroup.add(categoryRB_2);
+		categoryRadioButtonGroup.add(categoryRB_2);
 
 		JRadioButton categoryRB_3 = new JRadioButton("Naucnik");
 		categoryRB_3.addActionListener(new ActionListener() {
@@ -138,7 +138,7 @@ public class SignUpWindow extends Window {
 			}
 		});
 		categoryPanel.add(categoryRB_3);
-		buttonGroup.add(categoryRB_3);
+		categoryRadioButtonGroup.add(categoryRB_3);
 
 		JSeparator separator = new JSeparator();
 		separator.setBounds(12, 76, 572, 2);
@@ -150,6 +150,10 @@ public class SignUpWindow extends Window {
 
 		JLabel categoryLabel = new JLabel("Kategorija");
 		categoryLabelPanel.add(categoryLabel);
+		
+		/*
+		 * Poping out options, its visibility depends of input
+		 */
 
 		JPanel optionLabelPanel = new JPanel();
 		optionLabelPanel.setBounds(105, 180, 103, 21);
@@ -168,6 +172,10 @@ public class SignUpWindow extends Window {
 		JPanel arrangementPanel = new JPanel();
 		arrangementPanel.setBounds(95, 90, 103, 29);
 		frame.getContentPane().add(arrangementPanel);
+		
+		/*
+		 * Arrangement part of the window
+		 */
 
 		JLabel arrangementLabel = new JLabel("Aranzman");
 		arrangementPanel.add(arrangementLabel);
@@ -184,6 +192,8 @@ public class SignUpWindow extends Window {
 		JRadioButton arrangementOptionRB_2 = new JRadioButton("Pola");
 		arrangementButtonGroup.add(arrangementOptionRB_2);
 		arrangementOptionPanel.add(arrangementOptionRB_2);
+		
+		/* ---------------------- */
 
 		JPanel signupPanel = new JPanel();
 		signupPanel.setBounds(353, 258, 183, 45);
@@ -192,20 +202,24 @@ public class SignUpWindow extends Window {
 		JButton signupButton = new JButton("Prijavi se!");
 		signupButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				// sign up
+				/*
+				 * When sign up button is pressed
+				 */
 				String indeks = indeksInput.getText();
 				String category = null;
 				String arrangement = null;
 				String options = optionInput.getText();
 				
-				for (Enumeration<AbstractButton> buttons = buttonGroup
+				// finds which radio button is selected
+				for (Enumeration<AbstractButton> buttons = categoryRadioButtonGroup
 						.getElements(); buttons.hasMoreElements();) {
 					AbstractButton button = buttons.nextElement();
 
 					if (button.isSelected())
 						category = button.getText();
 				}
-
+				
+				// finds which radio button is selected
 				for (Enumeration<AbstractButton> buttons = arrangementButtonGroup
 						.getElements(); buttons.hasMoreElements();) {
 					AbstractButton button = buttons.nextElement();
@@ -213,9 +227,9 @@ public class SignUpWindow extends Window {
 					if (button.isSelected())
 						arrangement = button.getText();
 				}
-				
+				// Validation
 				try {
-					service.signUp(indeks,category,arrangement,options);
+					service.signUp(indeks, category, arrangement, options);
 				} catch (PrimaryKeyTakenException e1) {
 					System.out.println("ERROR: Index is taken");
 				} catch (NumberFormatException e2) {
@@ -235,15 +249,25 @@ public class SignUpWindow extends Window {
 		JPanel priceOutputPanel = new JPanel();
 		priceOutputPanel.setBounds(72, 258, 136, 29);
 		frame.getContentPane().add(priceOutputPanel);
-
+		
+		
+		/* FOR FUTURE CHANGE */
+		/*
+		 * Should prints out values given by service
+		 */
 		JLabel priceOutput = new JLabel("110 $");
 		priceOutputPanel.add(priceOutput);
-
+		
+		/*---------------------*/
+		
+		
+		// Switching window
 		JButton callOffButton = new JButton("Odjava");
 		callOffButton.addActionListener(windowController);
 		callOffButton.setBounds(501, 12, 83, 25);
 		frame.getContentPane().add(callOffButton);
-
+		
+		// Switching window
 		JButton edit = new JButton("Izmeni");
 		edit.addActionListener(windowController);
 		edit.setBounds(501, 43, 83, 25);

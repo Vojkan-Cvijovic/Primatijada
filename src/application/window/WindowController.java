@@ -2,10 +2,14 @@ package application.window;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-
 import application.service.PrimatijadaService;
 
+
+/* Class is in charge of controlling which window is displayed.
+ * Default window is SignUp.*/
+
 public class WindowController implements ActionListener{
+	
 	private CallOffWindow callOffWindow;
 	private SignUpWindow signUpWindow;
 	private EditWindow editWindow;
@@ -27,6 +31,7 @@ public class WindowController implements ActionListener{
 		
 	}
 
+	/* Detects which ActionEvent is invoked and responds to it*/
 	@Override
 	public void actionPerformed(ActionEvent e) {
 
@@ -44,7 +49,7 @@ public class WindowController implements ActionListener{
 		}
 		
 	}
-
+	
 	public void run() {
 		signUpWindow.run();
 		

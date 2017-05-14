@@ -17,9 +17,7 @@ public class CallOffWindow extends Window {
 
 	private WindowController windowController;
 	private JFrame frame;
-	/**
-	 * Create the application.
-	 */
+	
 	public CallOffWindow(WindowController windowController, PrimatijadaService service) {
 		this.windowController = windowController;
 		initialize();
@@ -42,6 +40,10 @@ public class CallOffWindow extends Window {
 	 * Initialize the contents of the frame.
 	 */
 	private void initialize() {
+		
+		/* 
+		 * Initializing base frame
+		 */
 		
 		frame = new JFrame();
 		frame.setResizable(false);
@@ -76,6 +78,13 @@ public class CallOffWindow extends Window {
 		JButton btnNewButton = new JButton("Odjavi se");
 		btnNewButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				/* For Future development */
+				
+				/* When this method is envoked, it should pass to service indeks,
+				 * and catch potentioal exceptions
+				 */
+				
+				
 				System.out.println("Odjavi se");
 			}
 		});
@@ -85,6 +94,7 @@ public class CallOffWindow extends Window {
 		lblNewLabel_1.setBounds(77, 154, 70, 15);
 		frame.getContentPane().add(lblNewLabel_1);
 
+		// Switching windows
 		JButton backButton = new JButton("Nazad");
 		backButton.addActionListener(windowController);
 		backButton.setBounds(30, 13, 83, 25);

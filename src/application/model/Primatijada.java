@@ -1,16 +1,20 @@
 package application.model;
 
 import java.sql.Connection;
-import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-
 import application.exception.PrimaryKeyTakenException;
 import application.exception.RecordNotExistsException;
 import application.utils.ConnectionManager;
 
+/*Low level tier
+ * it communicate directly with database,
+ * performs all queries,
+ * performs all operations with table TABLE_NAME,
+ * insert, update, delete, create ....
+ */
 public class Primatijada {
 
 	private int indeks; // not null
@@ -22,20 +26,13 @@ public class Primatijada {
 
 	private ConnectionManager connectionManager;
 	private static final String TABLE_NAME = "primatijada";
-	/********* SQL **********/
 
+	/*************************************** SQL *****************************************/
 	private static final String CREATE_TABLE_SQL = "create table "
 			+ TABLE_NAME
 			+ "( indeks integer not null,"
 			+ " godina smallint not null, tip char, sport varchar(20), rad varchar(100), aranzman char,"
 			+ " primary key(indeks, godina))";
-
-	/*
-	 * "create table " + TABLE_NAME +
-	 * " ( indeks integer not null, godina smallint not null, " +
-	 * "tip char, sport varchar(20), rad varchar(100), " +
-	 * "aranzman char, primary key(indeks, godina))";
-	 */
 	private static final String INSERT_SQL = "insert into " + TABLE_NAME
 			+ " values(?,?,?,?,?,?)";
 	private static final String DELETE_SQL = "delete from " + TABLE_NAME
@@ -48,6 +45,8 @@ public class Primatijada {
 			+ TABLE_NAME + " t1 where indeks = ? "
 			+ "and not exists ( select * from " + TABLE_NAME
 			+ " t2 where t2.godina > t1.godina ) ";
+
+	/*****************************************************************************************/
 
 	public Primatijada() {
 
@@ -76,7 +75,7 @@ public class Primatijada {
 	}
 
 	private void initialize() {
-		System.out.println("initializing Prmatijada");
+		System.out.println("Initializing Model");
 		indeks = 0;
 		godina = 0;
 		tip = 's';
@@ -87,16 +86,17 @@ public class Primatijada {
 
 	private void createTable(Connection connection) throws SQLException {
 
-		System.out.println("creating table");
+		System.out.println("Creating table " + TABLE_NAME);
 		try {
 			Statement statement = connection.createStatement();
 			statement.executeUpdate(CREATE_TABLE_SQL);
-			System.out.println("Table is created");
+			System.out.println("Table " + TABLE_NAME + " is created");
 		} catch (SQLException e) {
 			System.out.println("Error while creating table Error code "
 					+ e.getErrorCode());
 			if (e.getErrorCode() == -911 || e.getErrorCode() == -913) {
-
+				System.out.println("ERROR SQLCODE: " + e.getErrorCode()
+						+ " Database busy, rollback and try again ...");
 				connection.rollback();
 				createTable(connection);
 
@@ -106,13 +106,13 @@ public class Primatijada {
 	}
 
 	public void insert() throws PrimaryKeyTakenException {
-		System.out.println("Insert primatijada sa indeksom " + indeks);
+		System.out.println("Insert record to table " + TABLE_NAME
+				+ " with primary key " + indeks);
 		Connection connection = connectionManager.connect();
 
 		try {
 			insertAction(connection);
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} finally {
 			connectionManager.disconnect();
@@ -122,7 +122,7 @@ public class Primatijada {
 	private void insertAction(Connection connection) throws SQLException,
 			PrimaryKeyTakenException {
 
-		System.out.println("Preparing statement for insert");
+		System.out.println("Preparing statement for insert operation");
 
 		try {
 			PreparedStatement preparedStatement = connection
@@ -140,10 +140,11 @@ public class Primatijada {
 		} catch (SQLException e) {
 
 			if (e.getErrorCode() == -911 || e.getErrorCode() == -913) {
-				System.out.println("Insert primatijada db busy, again");
+				System.out.println("ERROR SQLCODE: " + e.getErrorCode()
+						+ " Database busy, rollback and try again ...");
 				connection.rollback();
-
 				insertAction(connection);
+
 			} else if (e.getErrorCode() == -803) {
 				throw new PrimaryKeyTakenException();
 			}
@@ -152,20 +153,23 @@ public class Primatijada {
 
 	}
 
-	public void delete() throws RecordNotExistsException {
+	public void delete(int indeks) throws RecordNotExistsException {
+		System.out.println("Deleting record for " + TABLE_NAME
+				+ " for primary key " + indeks);
 		Connection connection = connectionManager.connect();
 		try {
-			deleteAction(connection);
+			deleteAction(indeks, connection);
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} finally {
 			connectionManager.disconnect();
 		}
 	}
 
-	private void deleteAction(Connection connection) throws SQLException,
-			RecordNotExistsException {
+	private void deleteAction(int indeks, Connection connection)
+			throws SQLException, RecordNotExistsException {
+
+		System.out.println("Preparing statement for delete operation");
 
 		try {
 			PreparedStatement preparedStatement = connection
@@ -177,8 +181,10 @@ public class Primatijada {
 
 		} catch (SQLException e) {
 			if (e.getErrorCode() == -911 || e.getErrorCode() == -913) {
+				System.out.println("ERROR SQLCODE: " + e.getErrorCode()
+						+ " Database busy, rollback and try again ...");
 				connection.rollback();
-				deleteAction(connection);
+				deleteAction(indeks, connection);
 			} else if (e.getErrorCode() == 100)
 				throw new RecordNotExistsException();
 
@@ -187,11 +193,13 @@ public class Primatijada {
 	}
 
 	public void update() throws RecordNotExistsException {
+
+		System.out.println("Update record for " + TABLE_NAME
+				+ " with primary key " + indeks);
 		Connection connection = connectionManager.connect();
 		try {
 			updateAction(connection);
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} finally {
 			connectionManager.disconnect();
@@ -202,6 +210,7 @@ public class Primatijada {
 	private void updateAction(Connection connection) throws SQLException,
 			RecordNotExistsException {
 
+		System.out.println("Preparing statement for update operation");
 		try {
 			PreparedStatement preparedStatement = connection
 					.prepareStatement(UPDATE_SQL);
@@ -215,6 +224,8 @@ public class Primatijada {
 
 		} catch (SQLException e) {
 			if (e.getErrorCode() == -911 || e.getErrorCode() == -913) {
+				System.out.println("ERROR SQLCODE: " + e.getErrorCode()
+						+ " Database busy, rollback and try again ...");
 				connection.rollback();
 				updateAction(connection);
 			} else if (e.getErrorCode() == 100)
@@ -223,13 +234,15 @@ public class Primatijada {
 
 	}
 
-	public String retriveCategory(int indeks) throws RecordNotExistsException {
+	public String retrieveCategory(int indeks) throws RecordNotExistsException {
+
+		System.out.println("Retrieves data from table " + TABLE_NAME);
+
 		Connection connection = connectionManager.connect();
 		String category = null;
 		try {
 			category = retriveCategoryAction(indeks, connection);
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} finally {
 			connectionManager.disconnect();
@@ -239,6 +252,9 @@ public class Primatijada {
 
 	private String retriveCategoryAction(int indeks, Connection connection)
 			throws SQLException, RecordNotExistsException {
+
+		System.out.println("Preparing statement for select operation");
+
 		String category = null;
 		try {
 			PreparedStatement preparedStatement = connection
@@ -251,6 +267,8 @@ public class Primatijada {
 
 		} catch (SQLException e) {
 			if (e.getErrorCode() == -911 || e.getErrorCode() == -913) {
+				System.out.println("ERROR SQLCODE: " + e.getErrorCode()
+						+ " Database busy, rollback and try again ...");
 				connection.rollback();
 				category = retriveCategoryAction(indeks, connection);
 			} else if (e.getErrorCode() == 100)

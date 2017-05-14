@@ -4,6 +4,10 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
+
+/*
+ * ConnectionManager takes care of connection with db
+ */
 public class ConnectionManager {
 
 	private static final String USERNAME = "student";
@@ -22,7 +26,9 @@ public class ConnectionManager {
 	public ConnectionManager() {
 		connection = null;
 	}
-
+	/*
+	 * returns established connection to database
+	 */
 	public Connection connect() {
 		
 
@@ -37,8 +43,10 @@ public class ConnectionManager {
 
 	}
 
-	public void disconnect() {
-		
+	/*
+	 * Breaks open connection
+	 */
+	public void disconnect() {	
 		
 		try {
 			connection.close();
