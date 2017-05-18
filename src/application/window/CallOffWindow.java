@@ -10,6 +10,7 @@ import javax.swing.JButton;
 
 import application.exception.RecordNotExistsException;
 import application.service.PrimatijadaService;
+import application.service.ValidationService;
 
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
@@ -20,12 +21,12 @@ public class CallOffWindow extends Window {
 	private JFrame frame;
 	private JTextField indeksInput;
 
-	public CallOffWindow(WindowController windowController,PrimatijadaService service) {
+	public CallOffWindow(WindowController windowController,PrimatijadaService service, ValidationService validationService) {
 		this.windowController = windowController;
+		this.service = service;
+		this.validationService = validationService;
 		initialize();
 	}
-	
-	PrimatijadaService service = new PrimatijadaService();
 	
 	public void run() {
 

@@ -1,5 +1,6 @@
 package application.repository;
 
+import application.exception.DataBaseBusyException;
 import application.exception.PrimaryKeyTakenException;
 import application.exception.RecordNotExistsException;
 import application.model.Primatijada;
@@ -11,6 +12,7 @@ import application.model.Primatijada;
 public interface PrimatijadaRepository {
 
 	public static final String TABLE_NAME = "primatijada";
+	public static final int TRY_COUNT_LIMIT = 5;
 
 	/*************************************** SQL *****************************************/
 	public static final String CREATE_TABLE_SQL = "create table "
@@ -26,10 +28,8 @@ public interface PrimatijadaRepository {
 			+ " SET tip = ?, sport = ?, rad = ?, aranzman = ?, godina = ? where indeks = ?";
 	public static final String EXISTS_SQL = "select * from " + TABLE_NAME
 			+ " where indeks = ?";
-	public static final String RETRIVE_CATEGORY_SQL = "select tip from "
-			+ TABLE_NAME + " t1 where indeks = ? "
-			+ "and not exists ( select * from " + TABLE_NAME
-			+ " t2 where t2.godina > t1.godina ) ";
+	public static final String RETRIVE_SQL = "select * from "
+			+ TABLE_NAME + " where indeks = ? and godina = ?";
 
 	/***************************************************************************************/
 
@@ -39,5 +39,5 @@ public interface PrimatijadaRepository {
 
 	public void update(Primatijada model) throws RecordNotExistsException;
 
-	public String retrieveCategory(int indeks) throws RecordNotExistsException;
+	public Primatijada retrieve(int indeks) throws RecordNotExistsException, DataBaseBusyException;
 }

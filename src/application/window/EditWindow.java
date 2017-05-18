@@ -13,9 +13,12 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JSeparator;
 import javax.swing.JTextField;
+
+import application.exception.DataBaseBusyException;
 import application.exception.RecordNotExistsException;
 import application.repository.PrimatijadaRepositoryImplementation;
 import application.service.PrimatijadaService;
+import application.service.ValidationService;
 
 public class EditWindow extends Window {
 
@@ -38,11 +41,13 @@ public class EditWindow extends Window {
 
 	/**
 	 * Create the application.
+	 * @param validationService 
 	 */
 	public EditWindow(WindowController windowController,
-			PrimatijadaService service) {
+			PrimatijadaService service, ValidationService validationService) {
 		this.service = service;
 		this.windowController = windowController;
+		this.validationService = validationService;
 		initialize();
 	}
 
@@ -96,6 +101,9 @@ public class EditWindow extends Window {
 					System.out.println("ERROR: Indeks not valid");
 				} catch (RecordNotExistsException e1) {
 					System.out.println("ERROR: Indeks not found");
+				} catch (DataBaseBusyException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
 				}
 				// searching which button to activate
 				for (Enumeration<AbstractButton> buttons = buttonGroup

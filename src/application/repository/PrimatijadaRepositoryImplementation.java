@@ -5,6 +5,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Calendar;
+
+import application.exception.DataBaseBusyException;
 import application.exception.PrimaryKeyTakenException;
 import application.exception.RecordNotExistsException;
 import application.model.Primatijada;
@@ -196,47 +199,62 @@ public class PrimatijadaRepositoryImplementation implements
 
 	}
 
-	public String retrieveCategory(int indeks) throws RecordNotExistsException {
+	public Primatijada retrieve(int indeks) throws RecordNotExistsException, DataBaseBusyException {
 
 		System.out.println("Retrieves data from table " + TABLE_NAME);
 
 		Connection connection = connectionManager.connect();
-		String category = null;
+		Primatijada primatijada = null ;
 		try {
-			category = retriveCategoryAction(indeks, connection);
+			primatijada = retriveAction(indeks, connection, 0);
 		} catch (SQLException e) {
 			e.printStackTrace();
 		} finally {
 			connectionManager.disconnect();
 		}
-		return category;
+		return primatijada;
 	}
 
-	private String retriveCategoryAction(int indeks, Connection connection)
-			throws SQLException, RecordNotExistsException {
+	private Primatijada retriveAction(int indeks, Connection connection, int times)
+			throws SQLException, RecordNotExistsException, DataBaseBusyException {
+		
+		if(times > TRY_COUNT_LIMIT){
+			System.out.println("reached maximum count of atempts to write in db");
+			throw new DataBaseBusyException();
+		}
 
 		System.out.println("Preparing statement for select operation");
 
 		String category = null;
+		Primatijada primatijada = new Primatijada();
 		try {
 			PreparedStatement preparedStatement = connection
-					.prepareStatement(RETRIVE_CATEGORY_SQL);
+					.prepareStatement(RETRIVE_SQL);
 
 			preparedStatement.setInt(1, indeks);
+			preparedStatement.setInt(2, Calendar.YEAR + 1900);
+			
 			ResultSet resultSet = preparedStatement.executeQuery();
-			if (resultSet.next())
-				category = resultSet.getString(1);
+			
+			if (resultSet.next()){
+				primatijada.setIndeks(resultSet.getInt(1));
+				primatijada.setGodina(resultSet.getInt(2));
+				primatijada.setTip((char)resultSet.getShort(3));
+				primatijada.setSport(resultSet.getString(4));
+				primatijada.setRad(resultSet.getString(5));
+				primatijada.setAranzman((char) resultSet.getShort(6));
 
+			}
 		} catch (SQLException e) {
 			if (e.getErrorCode() == -911 || e.getErrorCode() == -913) {
 				System.out.println("ERROR SQLCODE: " + e.getErrorCode()
 						+ " Database busy, rollback and try again ...");
 				connection.rollback();
-				category = retriveCategoryAction(indeks, connection);
+				primatijada = retriveAction(indeks, connection, times++);
 			} else if (e.getErrorCode() == 100)
 				throw new RecordNotExistsException();
 		}
-		return category;
+		return primatijada;
 	}
 	
 	public float countingPrice(String tip1,String aranzman1,String godina1){
