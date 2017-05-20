@@ -1,9 +1,10 @@
 package application.service;
 
-import java.util.Enumeration;
-
-import javax.swing.AbstractButton;
-
+import application.exception.DataBaseBusyException;
+import application.exception.EmptyInputException;
+import application.exception.IndeksFormatException;
+import application.exception.InvalidInputException;
+import application.exception.InvalidInputFormatException;
 import application.exception.PrimaryKeyTakenException;
 import application.exception.RecordNotExistsException;
 import application.model.Primatijada;
@@ -25,31 +26,31 @@ public class PrimatijadaService {
 	// uses repository for communication with database
 	private PrimatijadaRepository repository;
 
+	private ValidationService validationService;
+
 	private static final String SPORT = "Sportista";
 	private static final String SCIENCE = "Naucnik";
-
-	/********************************/
-	/*
-	 * FOR FUTURE CHANGE/DELETE Temporary solution
-	 */
-	//private static final short godina = 1;
+	private static final int BASE_PRICE = 110;
 
 	/********************************/
 
-	public PrimatijadaService() {
+	public PrimatijadaService(ValidationService validationService) {
 		repository = new PrimatijadaRepositoryImplementation();
-
+		this.validationService = validationService;
 	}
 
 	public void signUp(String indeksString, String category,
-			String arrangement, String godina, String options)
-					throws PrimaryKeyTakenException, NumberFormatException {
-		
+			String arrangement, String options)
+			throws PrimaryKeyTakenException, NumberFormatException,
+			EmptyInputException, RecordNotExistsException,
+			DataBaseBusyException, IndeksFormatException,
+			InvalidInputFormatException {
+
 		int indeks = Integer.parseInt(indeksString);
 		Primatijada primatijada = new Primatijada();
-		int godinaInt = Integer.parseInt(godina);
+
 		primatijada.setIndeks(indeks);
-		if(arrangement.equalsIgnoreCase("Ceo")){
+		if (arrangement.equalsIgnoreCase("Ceo")) {
 			primatijada.setAranzman('c');
 		} else {
 			primatijada.setAranzman('p');
@@ -64,53 +65,25 @@ public class PrimatijadaService {
 		} else {
 			primatijada.setTip('x');
 		}
-
-		/*
-		 * FOR FUTURE CHANGE what is godina!?
-		 */
-		primatijada.setGodina(godinaInt);
-
+		validationService.check(primatijada);
 		repository.insert(primatijada);
 	}
 
-	public String retrieveCategory(String indeksString)
-			throws NumberFormatException, RecordNotExistsException {
-		int indeks = Integer.parseInt(indeksString);
-
-		String category = repository.retrieveCategory(indeks);
-
-		System.out.println(category);
-
-		switch (category.charAt(0)) {
-		case 'x':
-			return "Navijac";
-		case 's':
-			return "Sportista";
-		case 'n':
-			return "Naucnik";
-		}
-		System.out.println("ERROR unknown category");
-		return null;
-
-	}
-
-	public void updateRecord(String indeksString, String category, String arrangement, String godina,
+	public void updateRecord(String indeksString, String category,
 			String options) throws NumberFormatException,
-			RecordNotExistsException {
+			RecordNotExistsException, IndeksFormatException,
+			EmptyInputException, InvalidInputException,
+			InvalidInputFormatException, DataBaseBusyException {
+
+		validationService.checkIndeksFormat(indeksString);
+		validationService.checkOptionsInput(category, options);
 
 		int indeks = Integer.parseInt(indeksString);
-		int godinaInt = Integer.parseInt(godina); 
-		
+
 		Primatijada primatijada = new Primatijada();
-		
+
 		primatijada.setIndeks(indeks);
-		
-		if(arrangement.equalsIgnoreCase("ceo")){
-			primatijada.setAranzman('c');
-		} else if (arrangement.equalsIgnoreCase("pola")){
-			primatijada.setAranzman('p');
-		}
-		
+
 		if (category.equalsIgnoreCase("Naucnik")) {
 			primatijada.setTip('n');
 			primatijada.setRad(options);
@@ -119,18 +92,92 @@ public class PrimatijadaService {
 			primatijada.setSport(options);
 		} else
 			primatijada.setTip('x');
-		
-		primatijada.setGodina(godinaInt);
+
 		repository.update(primatijada);
 
 	}
 
-	/* FOR FUTURE DEVELOPMENT */
-	// deletes record from db
-	public void deleteRecord(String indeksString) throws RecordNotExistsException {
-		
+	public void deleteRecord(String indeksString)
+			throws RecordNotExistsException, IndeksFormatException,
+			DataBaseBusyException, EmptyInputException {
+
+		validationService.checkIndeksFormat(indeksString);
+
 		int indeks = Integer.parseInt(indeksString);
 		repository.delete(indeks);
+	}
+
+	public Primatijada retrievePrimatijada(String indeksText)
+			throws IndeksFormatException, NumberFormatException,
+			RecordNotExistsException, DataBaseBusyException,
+			EmptyInputException {
+
+		validationService.checkIndeksFormat(indeksText);
+
+		Primatijada p = repository.retrieve(Integer.parseInt(indeksText));
+
+		return p;
+	}
+
+	public float calculatePrice(String indeksText, String option,
+			String arrangement) throws IndeksFormatException,
+			DataBaseBusyException, EmptyInputException {
+		
+		validationService.checkIndeksFormat(indeksText);
+		
+		int indeks = Integer.parseInt(indeksText);
+		int count = 0;
+		try {
+			count = repository.getCountOfRecords(indeks);
+		} catch (RecordNotExistsException e) {
+		}
+
+		float price = BASE_PRICE;
+		int discount = 0;
+
+		if (arrangement.equalsIgnoreCase("pola"))
+			price = price / 2;
+
+		if (count == 2)
+			discount += 5;
+		else if (count > 2)
+			discount += 10;
+
+		if (option.equalsIgnoreCase(SCIENCE) || option.equalsIgnoreCase(SPORT))
+			discount += 70;
+
+		price = price * (100 - discount) / (float) 100;
+
+		return price;
+	}
+
+	public float calculatePrice(String indeksText, String option)
+			throws IndeksFormatException, EmptyInputException,
+			RecordNotExistsException, DataBaseBusyException {
+		validationService.checkIndeksFormat(indeksText);
+
+		int indeks = Integer.parseInt(indeksText);
+		Primatijada primatijada = repository.retrieve(indeks);
+
+		int count = repository.getCountOfRecords(indeks);
+		float price = BASE_PRICE;
+		int discount = 0;
+
+		if (primatijada.getAranzman() == 'p')
+			price = price / 2;
+
+		System.out.println("Count " + count);
+		if (count == 2)
+			discount += 5;
+		else if (count > 2)
+			discount += 10;
+
+		if (option.equalsIgnoreCase(SCIENCE) || option.equalsIgnoreCase(SPORT))
+			discount += 70;
+
+		price = price * (100 - discount) / (float) 100;
+
+		return price;
 	}
 
 }

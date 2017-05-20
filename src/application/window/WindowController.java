@@ -3,6 +3,7 @@ package application.window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import application.service.PrimatijadaService;
+import application.service.ValidationService;
 
 
 /* Class is in charge of controlling which window is displayed.
@@ -14,6 +15,7 @@ public class WindowController implements ActionListener{
 	private SignUpWindow signUpWindow;
 	private EditWindow editWindow;
 	private PrimatijadaService service;
+	private ValidationService validationService;
 	
 	private static final String BACK_BUTTON = "Nazad";
 	private static final String CALL_OFF_BUTTON = "Odjava";
@@ -24,10 +26,11 @@ public class WindowController implements ActionListener{
 	}
 
 	private void initialize() {
-		service = new PrimatijadaService();
-		callOffWindow = new CallOffWindow(this, service);
-		signUpWindow = new SignUpWindow(this, service);
-		editWindow = new EditWindow(this, service);
+		validationService = new ValidationService();
+		service = new PrimatijadaService(validationService);
+		callOffWindow = new CallOffWindow(this, service, validationService);
+		signUpWindow = new SignUpWindow(this, service, validationService);
+		editWindow = new EditWindow(this, service, validationService);
 		
 	}
 
@@ -41,10 +44,10 @@ public class WindowController implements ActionListener{
 			signUpWindow.run();
 		}
 		else if(e.getActionCommand().equalsIgnoreCase(CALL_OFF_BUTTON)){
-			signUpWindow.hide();
+			signUpWindow.hideWindow();
 			callOffWindow.run();
 		}else if(e.getActionCommand().equalsIgnoreCase(EDIT_BUTTON)){
-			signUpWindow.hide();
+			signUpWindow.hideWindow();
 			editWindow.run();
 		}
 		

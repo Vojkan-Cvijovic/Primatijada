@@ -1,33 +1,43 @@
 package application.window;
 
+import java.awt.Color;
 import java.awt.EventQueue;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.Enumeration;
 
 import javax.swing.AbstractButton;
 import javax.swing.ButtonGroup;
+import javax.swing.JButton;
 import javax.swing.JFrame;
-import javax.swing.JPanel;
 import javax.swing.JLabel;
-import javax.swing.JTextField;
+import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JSeparator;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
-import java.util.Enumeration;
+import javax.swing.JTextField;
 
-import javax.swing.JButton;
-import application.repository.PrimatijadaRepositoryImplementation;
+import application.exception.DataBaseBusyException;
+import application.exception.EmptyInputException;
+import application.exception.IndeksFormatException;
+import application.exception.InvalidInputException;
+import application.exception.InvalidInputFormatException;
 import application.exception.PrimaryKeyTakenException;
+import application.exception.RecordNotExistsException;
 import application.service.PrimatijadaService;
+import application.service.ValidationService;
 
 public class SignUpWindow extends Window {
 
 	private JFrame frame;
 	private WindowController windowController;
-	private JTextField indeksInput;
+	private JTextField indeksInput = null;
 	private ButtonGroup categoryRadioButtonGroup;
 	private JTextField optionInput;
-	private JTextField godinaInput;
-	
+	private JLabel indeksInputErrorOutput;
+	private JLabel errorOutput;
+	private JLabel optionsInputErrorOutput;
+	private JLabel priceOutputLabel;
+
 	private boolean showOptions = false;
 	private static final int SHORT_OPTION_WIDTH = 10;
 	private static final int LONG_OPTION_WIDTH = 20;
@@ -49,9 +59,10 @@ public class SignUpWindow extends Window {
 	}
 
 	public SignUpWindow(WindowController windowController,
-			PrimatijadaService service) {
+			PrimatijadaService service, ValidationService validationService) {
 		this.service = service;
 		this.windowController = windowController;
+		this.validationService = validationService;
 		initialize();
 	}
 
@@ -59,7 +70,7 @@ public class SignUpWindow extends Window {
 	 * Initialize the contents of the frame.
 	 */
 	private void initialize() {
-		
+
 		/*
 		 * Initializing base frame
 		 */
@@ -74,6 +85,35 @@ public class SignUpWindow extends Window {
 		final JLabel optionLabel = new JLabel("");
 		final JPanel optionInputPanel = new JPanel();
 		optionInput = new JTextField();
+		optionInput.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+
+				String category = null;
+
+				// finds which radio button is selected
+				for (Enumeration<AbstractButton> buttons = categoryRadioButtonGroup
+						.getElements(); buttons.hasMoreElements();) {
+					AbstractButton button = buttons.nextElement();
+
+					if (button.isSelected())
+						category = button.getText();
+
+				}
+				optionsInputErrorOutput.setText("");
+
+				try {
+					validationService.checkOptionsInput(category,
+							optionInput.getText());
+				} catch (EmptyInputException e1) {
+					optionsInputErrorOutput.setText(EMPTY_INPUT_ERROR);
+				} catch (InvalidInputException e1) {
+					optionsInputErrorOutput.setText(INPUT_TOO_LONG);
+				} catch (InvalidInputFormatException e1) {
+					optionsInputErrorOutput.setText(INVALID_INPUT_FORMAT);
+				}
+
+			}
+		});
 
 		JPanel indeksPanel = new JPanel();
 		indeksPanel.setBounds(95, 39, 83, 29);
@@ -87,17 +127,72 @@ public class SignUpWindow extends Window {
 		frame.getContentPane().add(signUpLabel);
 
 		JPanel indeksInputPanel = new JPanel();
-		indeksInputPanel.setBounds(256, 39, 183, 29);
+		indeksInputPanel.setBounds(223, 39, 160, 29);
 		frame.getContentPane().add(indeksInputPanel);
 
 		indeksInput = new JTextField();
+		indeksInput.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+
+				indeksInputErrorOutput.setText("");
+				errorOutput.setText("");
+
+				String indeks = indeksInput.getText();
+				String category = null;
+				String arrangement = null;
+
+				// finds which radio button is selected
+				for (Enumeration<AbstractButton> buttons = categoryRadioButtonGroup
+						.getElements(); buttons.hasMoreElements();) {
+					AbstractButton button = buttons.nextElement();
+
+					if (button.isSelected())
+						category = button.getText();
+
+				}
+
+				// finds which radio button is selected
+				for (Enumeration<AbstractButton> buttons = arrangementButtonGroup
+						.getElements(); buttons.hasMoreElements();) {
+					AbstractButton button = buttons.nextElement();
+
+					if (button.isSelected())
+						arrangement = button.getText();
+
+				}
+				boolean exists = false;
+				try {
+					exists = validationService
+							.checkIfIndeksExists(indeksInput.getText());
+					float price = service.calculatePrice(indeks, category,
+							arrangement);
+					if (exists) {
+						indeksInputErrorOutput.setText(INDEKS_TAKEN_ERROR);
+					}
+					
+					
+				} catch (NumberFormatException e1) {
+					indeksInputErrorOutput.setText(NUMBER_FORMAT_ERROR);
+				} catch (EmptyInputException e1) {
+					indeksInputErrorOutput.setText(EMPTY_INPUT_ERROR);
+				} catch (RecordNotExistsException e1) {
+					updatePrice();
+				} catch (DataBaseBusyException e1) {
+					errorOutput.setText(DATA_BASE_BUSY_ERROR);
+				} catch (IndeksFormatException e1) {
+					indeksInputErrorOutput.setText(INVALID_INPUT_FORMAT);
+				}
+
+			}
+		});
+
 		indeksInputPanel.add(indeksInput);
 		indeksInput.setColumns(10);
 
 		JPanel categoryPanel = new JPanel();
-		categoryPanel.setBounds(256, 139, 280, 29);
+		categoryPanel.setBounds(256, 156, 280, 29);
 		frame.getContentPane().add(categoryPanel);
-		
+
 		/* Creating button group for options radio buttons */
 
 		categoryRadioButtonGroup = new ButtonGroup();
@@ -108,6 +203,9 @@ public class SignUpWindow extends Window {
 				showOptions = false;
 				optionLabel.setVisible(showOptions);
 				optionInput.setVisible(showOptions);
+
+				updatePrice();
+
 			}
 		});
 		categoryRB_1.setSelected(true);
@@ -123,6 +221,7 @@ public class SignUpWindow extends Window {
 				optionInput.setVisible(showOptions);
 				optionInput.setColumns(SHORT_OPTION_WIDTH);
 
+				updatePrice();
 			}
 		});
 		categoryPanel.add(categoryRB_2);
@@ -136,34 +235,37 @@ public class SignUpWindow extends Window {
 				optionLabel.setText(PAPERWORK_LABEL);
 				optionInput.setVisible(showOptions);
 				optionInput.setColumns(LONG_OPTION_WIDTH);
+
+				updatePrice();
+
 			}
 		});
 		categoryPanel.add(categoryRB_3);
 		categoryRadioButtonGroup.add(categoryRB_3);
 
 		JSeparator separator = new JSeparator();
-		separator.setBounds(12, 76, 572, 2);
+		separator.setBounds(12, 91, 572, 2);
 		frame.getContentPane().add(separator);
 
 		JPanel categoryLabelPanel = new JPanel();
-		categoryLabelPanel.setBounds(95, 131, 103, 29);
+		categoryLabelPanel.setBounds(95, 156, 103, 29);
 		frame.getContentPane().add(categoryLabelPanel);
 
 		JLabel categoryLabel = new JLabel("Kategorija");
 		categoryLabelPanel.add(categoryLabel);
-		
+
 		/*
 		 * Poping out options, its visibility depends of input
 		 */
 
 		JPanel optionLabelPanel = new JPanel();
-		optionLabelPanel.setBounds(105, 180, 103, 21);
+		optionLabelPanel.setBounds(108, 206, 103, 21);
 		frame.getContentPane().add(optionLabelPanel);
 
 		optionLabelPanel.add(optionLabel);
 		optionLabel.setVisible(showOptions);
 
-		optionInputPanel.setBounds(223, 180, 316, 29);
+		optionInputPanel.setBounds(223, 209, 313, 29);
 		frame.getContentPane().add(optionInputPanel);
 
 		optionInputPanel.add(optionInput);
@@ -171,9 +273,9 @@ public class SignUpWindow extends Window {
 		optionInput.setVisible(showOptions);
 
 		JPanel arrangementPanel = new JPanel();
-		arrangementPanel.setBounds(95, 90, 103, 29);
+		arrangementPanel.setBounds(95, 115, 103, 29);
 		frame.getContentPane().add(arrangementPanel);
-		
+
 		/*
 		 * Arrangement part of the window
 		 */
@@ -182,38 +284,32 @@ public class SignUpWindow extends Window {
 		arrangementPanel.add(arrangementLabel);
 
 		JPanel arrangementOptionPanel = new JPanel();
-		arrangementOptionPanel.setBounds(258, 99, 183, 28);
+		arrangementOptionPanel.setBounds(256, 116, 183, 28);
 		frame.getContentPane().add(arrangementOptionPanel);
 
 		JRadioButton arrangementOptionRB_1 = new JRadioButton("Ceo");
+		arrangementOptionRB_1.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+
+				updatePrice();
+			}
+		});
 		arrangementOptionRB_1.setSelected(true);
 		arrangementButtonGroup.add(arrangementOptionRB_1);
 		arrangementOptionPanel.add(arrangementOptionRB_1);
 
 		JRadioButton arrangementOptionRB_2 = new JRadioButton("Pola");
+		arrangementOptionRB_2.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+
+				updatePrice();
+			}
+		});
 		arrangementButtonGroup.add(arrangementOptionRB_2);
 		arrangementOptionPanel.add(arrangementOptionRB_2);
-		
-		/* ---------------------- */
 
-		JPanel godinaPanel = new JPanel();
-		godinaPanel.setBounds(95, 220, 83, 29);
-		frame.getContentPane().add(godinaPanel);
-
-		JLabel godinaLabel = new JLabel("Godina");
-		godinaPanel.add(godinaLabel);
-
-		JPanel godinaInputPanel = new JPanel();
-		godinaInputPanel.setBounds(256, 220, 183, 29);
-		frame.getContentPane().add(godinaInputPanel);
-				
-		godinaInput =  new JTextField();
-		
-		godinaInputPanel.add(godinaInput);
-		godinaInput.setColumns(10);
-						
 		JPanel signupPanel = new JPanel();
-		signupPanel.setBounds(353, 258, 183, 45);
+		signupPanel.setBounds(353, 283, 183, 45);
 		frame.getContentPane().add(signupPanel);
 
 		JButton signupButton = new JButton("Prijavi se!");
@@ -226,8 +322,7 @@ public class SignUpWindow extends Window {
 				String category = null;
 				String arrangement = null;
 				String options = optionInput.getText();
-				String godina  = godinaInput.getText();
-				
+
 				// finds which radio button is selected
 				for (Enumeration<AbstractButton> buttons = categoryRadioButtonGroup
 						.getElements(); buttons.hasMoreElements();) {
@@ -235,9 +330,9 @@ public class SignUpWindow extends Window {
 
 					if (button.isSelected())
 						category = button.getText();
-						
+
 				}
-				
+
 				// finds which radio button is selected
 				for (Enumeration<AbstractButton> buttons = arrangementButtonGroup
 						.getElements(); buttons.hasMoreElements();) {
@@ -245,79 +340,116 @@ public class SignUpWindow extends Window {
 
 					if (button.isSelected())
 						arrangement = button.getText();
-						
+
 				}
 				// Validation
 				try {
-					service.signUp(indeks, category, arrangement, godina, options);
+					service.signUp(indeks, category, arrangement, options);
+					float price = service.calculatePrice(indeks, category,
+							arrangement);
+					priceOutputLabel.setText(price + " din");
 				} catch (PrimaryKeyTakenException e1) {
-					System.out.println("ERROR: Index is taken");
+					indeksInputErrorOutput.setText(INDEKS_TAKEN_ERROR);
 				} catch (NumberFormatException e2) {
-					System.out.println("ERROR: Index is not number");
+					indeksInputErrorOutput.setText(NUMBER_FORMAT_ERROR);
+				} catch (EmptyInputException e1) {
+				} catch (RecordNotExistsException e1) {
+				} catch (DataBaseBusyException e1) {
+					errorOutput.setText(DATA_BASE_BUSY_ERROR);
+				} catch (IndeksFormatException e1) {
+					indeksInputErrorOutput.setText(INVALID_INPUT_FORMAT);
+				} catch (InvalidInputFormatException e1) {
+					indeksInputErrorOutput.setText(INVALID_INPUT_FORMAT);
 				}
-				
-				PrimatijadaRepositoryImplementation pri = new PrimatijadaRepositoryImplementation();
-				float price = pri.countingPrice(category, arrangement, godina);
-				System.out.println(price);
-				
-				JFrame prozor = new JFrame();
-				prozor.setResizable(false);
-				prozor.setBounds(100,100,200,200);
-				prozor.setTitle("Cena");
-				prozor.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-				prozor.setVisible(true);
-				
-				JPanel pricePanel = new JPanel();
-				pricePanel.setBounds(200, 200, 83, 29);
-				prozor.getContentPane().add(pricePanel);
-				
-				String cena = String.valueOf(price);
-				JLabel priceLabel = new JLabel("Cena je: " + cena);
-				pricePanel.add(priceLabel);
-				prozor.add(pricePanel);
-				
 			}
 		});
 		signupPanel.add(signupButton);
 
 		JPanel priceLabelPanel = new JPanel();
-		priceLabelPanel.setBounds(35, 258, 56, 29);
+		priceLabelPanel.setBounds(38, 283, 56, 29);
 		frame.getContentPane().add(priceLabelPanel);
 
 		JLabel lblNewLabel_2 = new JLabel("Cena :");
 		priceLabelPanel.add(lblNewLabel_2);
 
 		JPanel priceOutputPanel = new JPanel();
-		priceOutputPanel.setBounds(72, 258, 136, 29);
+		priceOutputPanel.setBounds(72, 283, 136, 29);
 		frame.getContentPane().add(priceOutputPanel);
-		
-		
-		/* FOR FUTURE CHANGE */
-		/*
-		 * Should prints out values given by service
-		 */
-		JLabel priceOutput = new JLabel("110 $");
-		priceOutputPanel.add(priceOutput);
-		
+
+		priceOutputLabel = new JLabel("   ");
+		priceOutputPanel.add(priceOutputLabel);
+
 		/*---------------------*/
-		
-		
+
 		// Switching window
 		JButton callOffButton = new JButton("Odjava");
 		callOffButton.addActionListener(windowController);
 		callOffButton.setBounds(501, 12, 83, 25);
 		frame.getContentPane().add(callOffButton);
-		
+
 		// Switching window
 		JButton edit = new JButton("Izmeni");
 		edit.addActionListener(windowController);
 		edit.setBounds(501, 43, 83, 25);
 		frame.getContentPane().add(edit);
 
+		indeksInputErrorOutput = new JLabel("");
+		indeksInputErrorOutput.setForeground(Color.RED);
+		indeksInputErrorOutput.setBounds(245, 67, 223, 24);
+		frame.getContentPane().add(indeksInputErrorOutput);
+
+		optionsInputErrorOutput = new JLabel("");
+		optionsInputErrorOutput.setForeground(Color.RED);
+		optionsInputErrorOutput.setBounds(313, 241, 126, 15);
+		frame.getContentPane().add(optionsInputErrorOutput);
+
+		errorOutput = new JLabel("");
+		errorOutput.setBounds(394, 326, 142, 15);
+		frame.getContentPane().add(errorOutput);
+
 	}
 
-	public void hide() {
+	public void hideWindow() {
 		frame.setVisible(false);
+
+	}
+
+	private void updatePrice() {
+		String indeks = indeksInput.getText();
+		String category = null;
+		String arrangement = null;
+
+		// finds which radio button is selected
+		for (Enumeration<AbstractButton> buttons = categoryRadioButtonGroup
+				.getElements(); buttons.hasMoreElements();) {
+			AbstractButton button = buttons.nextElement();
+
+			if (button.isSelected())
+				category = button.getText();
+
+		}
+
+		// finds which radio button is selected
+		for (Enumeration<AbstractButton> buttons = arrangementButtonGroup
+				.getElements(); buttons.hasMoreElements();) {
+			AbstractButton button = buttons.nextElement();
+
+			if (button.isSelected())
+				arrangement = button.getText();
+
+		}
+
+		float price;
+		try {
+			price = service.calculatePrice(indeks, category, arrangement);
+			priceOutputLabel.setText(price + " $");
+		} catch (IndeksFormatException e1) {
+			indeksInputErrorOutput.setText(INVALID_INPUT_FORMAT);
+		} catch (DataBaseBusyException e1) {
+			errorOutput.setText(DATA_BASE_BUSY_ERROR);
+		} catch (EmptyInputException e1) {
+			indeksInputErrorOutput.setText(EMPTY_INPUT_ERROR);
+		}
 
 	}
 }

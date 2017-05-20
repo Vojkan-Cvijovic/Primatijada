@@ -1,5 +1,8 @@
 package application.model;
 
+import java.util.Calendar;
+import java.util.Date;
+
 /*
  * Represents table primatijada
  * 	performs all validations 
@@ -22,24 +25,14 @@ public class Primatijada {
 	private void initialize() {
 		System.out.println("Initializing Model");
 		indeks = 0;
-		godina = 0;
+		godina = Calendar.getInstance().get(Calendar.YEAR);
+		System.out.println(godina);
 		tip = 's';
 		sport = null;
 		rad = null;
 		aranzman = 'c';
 	}
 	
-
-	 /* FOR FUTURE DEVELOPMENT */
-	 
-	/*
-	 * Dodati ogranicenja za polja klase Primatijada,
-	 * proveru za svako polje obaviti u seteru tog polja
-	 * tipa duzinu Stringa sport ako je tip = 's'
-	 * 
-	 * Kad zavrsis sa ogranicenjima obrisi ova dva komentara
-	 */
-
 	public int getIndeks() {
 		return indeks;
 	}

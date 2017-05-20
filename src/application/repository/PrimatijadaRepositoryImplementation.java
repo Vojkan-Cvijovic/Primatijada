@@ -5,6 +5,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Calendar;
+
+import application.exception.DataBaseBusyException;
 import application.exception.PrimaryKeyTakenException;
 import application.exception.RecordNotExistsException;
 import application.model.Primatijada;
@@ -63,13 +66,14 @@ public class PrimatijadaRepositoryImplementation implements
 
 	}
 
-	public void insert(Primatijada model) throws PrimaryKeyTakenException {
+	public void insert(Primatijada model) throws PrimaryKeyTakenException,
+			DataBaseBusyException {
 		System.out.println("Insert record to table " + TABLE_NAME
 				+ " with primary key " + model.getIndeks());
 		Connection connection = connectionManager.connect();
 
 		try {
-			insertAction(model, connection);
+			insertAction(model, connection, 0);
 		} catch (SQLException e) {
 			e.printStackTrace();
 		} finally {
@@ -77,8 +81,15 @@ public class PrimatijadaRepositoryImplementation implements
 		}
 	}
 
-	private void insertAction(Primatijada model, Connection connection)
-			throws SQLException, PrimaryKeyTakenException {
+	private void insertAction(Primatijada model, Connection connection,
+			int times) throws SQLException, PrimaryKeyTakenException,
+			DataBaseBusyException {
+
+		if (times > TRY_COUNT_LIMIT) {
+			System.out
+					.println("reached maximum count of atempts to write in db");
+			throw new DataBaseBusyException();
+		}
 
 		System.out.println("Preparing statement for insert operation");
 
@@ -94,15 +105,14 @@ public class PrimatijadaRepositoryImplementation implements
 			preparedStatement.setString(6, String.valueOf(model.getAranzman()));
 
 			preparedStatement.executeUpdate();
-			
-			
+
 		} catch (SQLException e) {
 
 			if (e.getErrorCode() == -911 || e.getErrorCode() == -913) {
 				System.out.println("ERROR SQLCODE: " + e.getErrorCode()
 						+ " Database busy, rollback and try again ...");
 				connection.rollback();
-				insertAction(model, connection);
+				insertAction(model, connection, times++);
 
 			} else if (e.getErrorCode() == -803) {
 				throw new PrimaryKeyTakenException();
@@ -112,12 +122,13 @@ public class PrimatijadaRepositoryImplementation implements
 
 	}
 
-	public void delete(int indeks) throws RecordNotExistsException {
+	public void delete(int indeks) throws RecordNotExistsException,
+			DataBaseBusyException {
 		System.out.println("Deleting record for " + TABLE_NAME
 				+ " for primary key " + indeks);
 		Connection connection = connectionManager.connect();
 		try {
-			deleteAction(indeks, connection);
+			deleteAction(indeks, connection, 0);
 		} catch (SQLException e) {
 			e.printStackTrace();
 		} finally {
@@ -125,8 +136,15 @@ public class PrimatijadaRepositoryImplementation implements
 		}
 	}
 
-	private void deleteAction(int indeks, Connection connection)
-			throws SQLException, RecordNotExistsException {
+	private void deleteAction(int indeks, Connection connection, int times)
+			throws SQLException, RecordNotExistsException,
+			DataBaseBusyException {
+
+		if (times > TRY_COUNT_LIMIT) {
+			System.out
+					.println("reached maximum count of atempts to write in db");
+			throw new DataBaseBusyException();
+		}
 
 		System.out.println("Preparing statement for delete operation");
 
@@ -143,7 +161,7 @@ public class PrimatijadaRepositoryImplementation implements
 				System.out.println("ERROR SQLCODE: " + e.getErrorCode()
 						+ " Database busy, rollback and try again ...");
 				connection.rollback();
-				deleteAction(indeks, connection);
+				deleteAction(indeks, connection, times++);
 			} else if (e.getErrorCode() == 100)
 				throw new RecordNotExistsException();
 
@@ -151,13 +169,14 @@ public class PrimatijadaRepositoryImplementation implements
 
 	}
 
-	public void update(Primatijada model) throws RecordNotExistsException {
+	public void update(Primatijada model) throws RecordNotExistsException,
+			DataBaseBusyException {
 
 		System.out.println("Update record for " + TABLE_NAME
 				+ " with primary key " + model.getIndeks());
 		Connection connection = connectionManager.connect();
 		try {
-			updateAction(model, connection);
+			updateAction(model, connection, 0);
 		} catch (SQLException e) {
 			e.printStackTrace();
 		} finally {
@@ -166,8 +185,15 @@ public class PrimatijadaRepositoryImplementation implements
 
 	}
 
-	private void updateAction(Primatijada model, Connection connection)
-			throws SQLException, RecordNotExistsException {
+	private void updateAction(Primatijada model, Connection connection,
+			int times) throws SQLException, RecordNotExistsException,
+			DataBaseBusyException {
+
+		if (times > TRY_COUNT_LIMIT) {
+			System.out
+					.println("reached maximum count of atempts to write in db");
+			throw new DataBaseBusyException();
+		}
 
 		System.out.println("Preparing statement for update operation");
 		try {
@@ -182,127 +208,146 @@ public class PrimatijadaRepositoryImplementation implements
 			preparedStatement.setInt(6, model.getIndeks());
 
 			preparedStatement.executeUpdate();
-			
-			
+
 		} catch (SQLException e) {
 			if (e.getErrorCode() == -911 || e.getErrorCode() == -913) {
 				System.out.println("ERROR SQLCODE: " + e.getErrorCode()
 						+ " Database busy, rollback and try again ...");
 				connection.rollback();
-				updateAction(model, connection);
+				updateAction(model, connection, times++);
 			} else if (e.getErrorCode() == 100)
 				throw new RecordNotExistsException();
 		}
 
 	}
 
-	public String retrieveCategory(int indeks) throws RecordNotExistsException {
+	public Primatijada retrieve(int indeks) throws RecordNotExistsException,
+			DataBaseBusyException {
 
 		System.out.println("Retrieves data from table " + TABLE_NAME);
 
 		Connection connection = connectionManager.connect();
-		String category = null;
+		Primatijada primatijada = null;
 		try {
-			category = retriveCategoryAction(indeks, connection);
+			primatijada = retriveAction(indeks, connection, 0);
 		} catch (SQLException e) {
 			e.printStackTrace();
 		} finally {
 			connectionManager.disconnect();
 		}
-		return category;
+		return primatijada;
 	}
 
-	private String retriveCategoryAction(int indeks, Connection connection)
-			throws SQLException, RecordNotExistsException {
+	private Primatijada retriveAction(int indeks, Connection connection,
+			int times) throws SQLException, RecordNotExistsException,
+			DataBaseBusyException {
+
+		if (times > TRY_COUNT_LIMIT) {
+			System.out
+					.println("reached maximum count of atempts to write in db");
+			throw new DataBaseBusyException();
+		}
 
 		System.out.println("Preparing statement for select operation");
 
-		String category = null;
+		Primatijada primatijada = new Primatijada();
 		try {
 			PreparedStatement preparedStatement = connection
-					.prepareStatement(RETRIVE_CATEGORY_SQL);
+					.prepareStatement(RETRIVE_SQL);
 
 			preparedStatement.setInt(1, indeks);
-			ResultSet resultSet = preparedStatement.executeQuery();
-			if (resultSet.next())
-				category = resultSet.getString(1);
+			int godina = Calendar.getInstance().get(Calendar.YEAR);
+			preparedStatement.setInt(2, godina);
 
+			ResultSet resultSet = preparedStatement.executeQuery();
+
+			if (resultSet.next()) {
+				primatijada.setIndeks(resultSet.getInt(1));
+				primatijada.setGodina(resultSet.getInt(2));
+				primatijada.setTip((char) resultSet.getShort(3));
+				primatijada.setSport(resultSet.getString(4));
+				primatijada.setRad(resultSet.getString(5));
+				primatijada.setAranzman((char) resultSet.getShort(6));
+			} else {
+				System.out.println("indeks " + indeks);
+				throw new RecordNotExistsException();
+			}
 		} catch (SQLException e) {
 			if (e.getErrorCode() == -911 || e.getErrorCode() == -913) {
 				System.out.println("ERROR SQLCODE: " + e.getErrorCode()
 						+ " Database busy, rollback and try again ...");
 				connection.rollback();
-				category = retriveCategoryAction(indeks, connection);
+				primatijada = retriveAction(indeks, connection, times++);
 			} else if (e.getErrorCode() == 100)
 				throw new RecordNotExistsException();
 		}
-		return category;
+		return primatijada;
 	}
-	
-	public float countingPrice(String tip1,String aranzman1,String godina1){
-		
-		float cena = 0;
-		char tip = tip1.charAt(0);
-		char aranzman = aranzman1.charAt(0);
-		int godina = Integer.parseInt(godina1);
-		
-		if(tip == 's'){
-			if(aranzman == 'c'){
-				cena = 110 * 30 / 100;
-				if(godina == 2){
-					cena -= cena * 5 / 100; 
-				} else if(godina > 2 ){
-					cena -= cena * 10 / 100;
-				}
+
+	@Override
+	public int getCountOfRecords(int indeks) throws DataBaseBusyException,
+			RecordNotExistsException {
+
+		System.out.println("Getting number of times for indeks " + indeks);
+		Connection connection = connectionManager.connect();
+		int count = 0;
+		try {
+			count = getCountOfRecordsAction(indeks, connection, 0);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			connectionManager.disconnect();
+		}
+
+		return count;
+	}
+
+	private int getCountOfRecordsAction(int indeks, Connection connection,
+			int times) throws SQLException, DataBaseBusyException,
+			RecordNotExistsException {
+
+		if (times > TRY_COUNT_LIMIT) {
+			System.out
+					.println("Reached maximum count of atempts to write in db");
+			throw new DataBaseBusyException();
+		}
+
+		PreparedStatement preparedStatement;
+		int count = 0;
+
+		try {
+			preparedStatement = connection.prepareStatement(COUNT_SQL);
+
+			preparedStatement.setInt(1, indeks);
+
+			ResultSet resultSet = preparedStatement.executeQuery();
+			System.out.println("executed query");
+			int godina = Calendar.getInstance().get(Calendar.YEAR);
+			while(resultSet.next()){
+				System.out.println("Godina ");
+				int g = resultSet.getInt(1);
+				if(g != godina)
+					break;
+				godina--;
+				count++;
+				
 			}
-			else{
-				cena = (110 * 30 / 100) / 2;
-				if(godina == 2){
-					cena -= cena * 5 / 100;
-				} else if(godina > 2){
-					cena -= cena * 10 / 100;
-				}
+			if(count == 0){
+				System.out.println("fist time for indeks " + indeks);
+				throw new RecordNotExistsException();
 			}
-		} else if(tip == 'n'){
-			if(aranzman == 'c'){
-				cena = 110 * 30 / 100;
-				if(godina == 2){
-					cena -= cena * 5 / 100; 
-				} else if(godina > 2 ){
-					cena -= cena * 10 / 100;
-				}
-			}
-			else{
-				cena = (110 * 30 / 100) / 2;
-				if(godina == 2){
-					cena -= cena * 5 / 100;
-				} else if(godina > 2){
-					cena -= cena * 10 / 100;
-				}
-			}
-		} else{
-			if(aranzman == 'c'){
-				cena = 110;
-				if(godina == 2){
-					cena -= cena * 5 / 100;
-				}
-				else{
-					if(godina > 2){
-						cena -= cena *10 / 100;
-					}
-				}
-			}
-			else{
-				cena = 110 / 2;
-				if(godina == 2){
-					cena -= cena * 5 /100;
-				} else if(godina > 2){
-					cena -= cena * 10 /100;
-				}
+
+		} catch (SQLException e) {
+			if (e.getErrorCode() == -911 || e.getErrorCode() == -913) {
+				System.out.println("ERROR SQLCODE: " + e.getErrorCode()
+						+ " Database busy, rollback and try again ...");
+
+				connection.rollback();
+				count = getCountOfRecordsAction(indeks, connection, times++);
+
 			}
 		}
-		
-		return cena;
+		return count;
 	}
 
 }
