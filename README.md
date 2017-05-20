@@ -1,7 +1,7 @@
 # Primatijada
 Primatijada - school project
 
-![UML Diagram](UMLdijagram.jpg)
+![UML Diagram](Primatijada.jpg)
 
 
 
