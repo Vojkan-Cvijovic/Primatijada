@@ -1,9 +1,19 @@
 package application.service;
 
+<<<<<<< HEAD
 import application.exception.DataBaseBusyException;
 import application.exception.EmptyInputException;
 import application.exception.IndeksFormatException;
 import application.exception.InvalidInputException;
+=======
+import java.util.Enumeration;
+
+import javax.swing.AbstractButton;
+
+import application.exception.DataBaseBusyException;
+import application.exception.EmptyInputException;
+import application.exception.IndeksFormatException;
+>>>>>>> 2c0224dd3814943461d71ac46b0c70cad05aeeaa
 import application.exception.InvalidInputFormatException;
 import application.exception.PrimaryKeyTakenException;
 import application.exception.RecordNotExistsException;
@@ -32,7 +42,10 @@ public class PrimatijadaService {
 	private static final String SCIENCE = "Naucnik";
 	private static final int BASE_PRICE = 110;
 
-	/********************************/
+
+	/**
+	 * @param validationService
+	 ******************************/
 
 	public PrimatijadaService(ValidationService validationService) {
 		repository = new PrimatijadaRepositoryImplementation();
@@ -69,6 +82,7 @@ public class PrimatijadaService {
 		repository.insert(primatijada);
 	}
 
+
 	public void updateRecord(String indeksString, String category,
 			String options) throws NumberFormatException,
 			RecordNotExistsException, IndeksFormatException,
@@ -97,11 +111,13 @@ public class PrimatijadaService {
 
 	}
 
+
 	public void deleteRecord(String indeksString)
 			throws RecordNotExistsException, IndeksFormatException,
 			DataBaseBusyException, EmptyInputException {
 
 		validationService.checkIndeksFormat(indeksString);
+
 
 		int indeks = Integer.parseInt(indeksString);
 		repository.delete(indeks);

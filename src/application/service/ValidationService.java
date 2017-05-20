@@ -18,7 +18,11 @@ public class ValidationService {
 		repository = new PrimatijadaRepositoryImplementation();
 	}
 
+<<<<<<< HEAD
 	public boolean checkIfIndeksExists(String text) throws EmptyInputException,
+=======
+	public void checkIfIndeksExists(String text) throws EmptyInputException,
+>>>>>>> 2c0224dd3814943461d71ac46b0c70cad05aeeaa
 			NumberFormatException, RecordNotExistsException,
 			DataBaseBusyException, IndeksFormatException {
 
@@ -31,7 +35,11 @@ public class ValidationService {
 		int indeks = Integer.parseInt(text);
 
 		repository.retrieve(indeks);
+<<<<<<< HEAD
 		return true;
+=======
+
+>>>>>>> 2c0224dd3814943461d71ac46b0c70cad05aeeaa
 	}
 
 	public void checkOptionsInput(String category, String text)
@@ -54,6 +62,7 @@ public class ValidationService {
 
 	public void check(Primatijada primatijada) throws NumberFormatException,
 			EmptyInputException, RecordNotExistsException,
+<<<<<<< HEAD
 			DataBaseBusyException, IndeksFormatException,
 			InvalidInputFormatException {
 		checkIfIndeksExists(primatijada.getIndeks() + "");
@@ -77,6 +86,19 @@ public class ValidationService {
 		if (!indeksText.matches("([0-9]){5}"))
 			throw new IndeksFormatException();
 
+=======
+			DataBaseBusyException, IndeksFormatException, InvalidInputFormatException {
+		checkIfIndeksExists(primatijada.getIndeks() + "");
+
+		if(primatijada.getTip() == 's')
+			if (!primatijada.getSport().matches("([a-z]|[A-Z])+"))
+				throw new InvalidInputFormatException();
+		
+		if(primatijada.getTip() == 'n')
+			if(!primatijada.getRad().matches("([a-z]|[A-Z])+"))
+				throw new InvalidInputFormatException();
+		
+>>>>>>> 2c0224dd3814943461d71ac46b0c70cad05aeeaa
 	}
 
 }

@@ -221,13 +221,21 @@ public class PrimatijadaRepositoryImplementation implements
 
 	}
 
+<<<<<<< HEAD
 	public Primatijada retrieve(int indeks) throws RecordNotExistsException,
 			DataBaseBusyException {
+=======
+	public Primatijada retrieve(int indeks) throws RecordNotExistsException, DataBaseBusyException {
+>>>>>>> 2c0224dd3814943461d71ac46b0c70cad05aeeaa
 
 		System.out.println("Retrieves data from table " + TABLE_NAME);
 
 		Connection connection = connectionManager.connect();
+<<<<<<< HEAD
 		Primatijada primatijada = null;
+=======
+		Primatijada primatijada = null ;
+>>>>>>> 2c0224dd3814943461d71ac46b0c70cad05aeeaa
 		try {
 			primatijada = retriveAction(indeks, connection, 0);
 		} catch (SQLException e) {
@@ -238,6 +246,7 @@ public class PrimatijadaRepositoryImplementation implements
 		return primatijada;
 	}
 
+<<<<<<< HEAD
 	private Primatijada retriveAction(int indeks, Connection connection,
 			int times) throws SQLException, RecordNotExistsException,
 			DataBaseBusyException {
@@ -245,17 +254,29 @@ public class PrimatijadaRepositoryImplementation implements
 		if (times > TRY_COUNT_LIMIT) {
 			System.out
 					.println("reached maximum count of atempts to write in db");
+=======
+	private Primatijada retriveAction(int indeks, Connection connection, int times)
+			throws SQLException, RecordNotExistsException, DataBaseBusyException {
+		
+		if(times > TRY_COUNT_LIMIT){
+			System.out.println("reached maximum count of atempts to write in db");
+>>>>>>> 2c0224dd3814943461d71ac46b0c70cad05aeeaa
 			throw new DataBaseBusyException();
 		}
 
 		System.out.println("Preparing statement for select operation");
 
+<<<<<<< HEAD
+=======
+		String category = null;
+>>>>>>> 2c0224dd3814943461d71ac46b0c70cad05aeeaa
 		Primatijada primatijada = new Primatijada();
 		try {
 			PreparedStatement preparedStatement = connection
 					.prepareStatement(RETRIVE_SQL);
 
 			preparedStatement.setInt(1, indeks);
+<<<<<<< HEAD
 			int godina = Calendar.getInstance().get(Calendar.YEAR);
 			preparedStatement.setInt(2, godina);
 
@@ -271,6 +292,20 @@ public class PrimatijadaRepositoryImplementation implements
 			} else {
 				System.out.println("indeks " + indeks);
 				throw new RecordNotExistsException();
+=======
+			preparedStatement.setInt(2, Calendar.YEAR + 1900);
+			
+			ResultSet resultSet = preparedStatement.executeQuery();
+			
+			if (resultSet.next()){
+				primatijada.setIndeks(resultSet.getInt(1));
+				primatijada.setGodina(resultSet.getInt(2));
+				primatijada.setTip((char)resultSet.getShort(3));
+				primatijada.setSport(resultSet.getString(4));
+				primatijada.setRad(resultSet.getString(5));
+				primatijada.setAranzman((char) resultSet.getShort(6));
+
+>>>>>>> 2c0224dd3814943461d71ac46b0c70cad05aeeaa
 			}
 		} catch (SQLException e) {
 			if (e.getErrorCode() == -911 || e.getErrorCode() == -913) {

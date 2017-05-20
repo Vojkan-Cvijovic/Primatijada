@@ -29,10 +29,12 @@ public interface PrimatijadaRepository {
 			+ " SET tip = ?, sport = ?, rad = ?, aranzman = ?, godina = ? where indeks = ?";
 	public static final String EXISTS_SQL = "select * from " + TABLE_NAME
 			+ " where indeks = ?";
+
 	public static final String RETRIVE_SQL = "select * from " + TABLE_NAME
 			+ " where indeks = ? and godina = ?";
 	public static final String COUNT_SQL = "select godina from " + TABLE_NAME
 			+ " where indeks = ? order by 1 desc";
+
 
 	/***************************************************************************************/
 
@@ -50,4 +52,5 @@ public interface PrimatijadaRepository {
 
 	public int getCountOfRecords(int indeks) throws RecordNotExistsException,
 			DataBaseBusyException;
+
 }

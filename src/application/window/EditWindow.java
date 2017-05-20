@@ -15,14 +15,17 @@ import javax.swing.JSeparator;
 import javax.swing.JTextField;
 
 import application.exception.DataBaseBusyException;
+
 import application.exception.EmptyInputException;
 import application.exception.IndeksFormatException;
 import application.exception.InvalidInputException;
 import application.exception.InvalidInputFormatException;
+
 import application.exception.RecordNotExistsException;
 import application.model.Primatijada;
 import application.service.PrimatijadaService;
 import application.service.ValidationService;
+
 import java.awt.Color;
 
 public class EditWindow extends Window {
@@ -46,12 +49,15 @@ public class EditWindow extends Window {
 	private static final String PAPERWORK_LABEL = "Rad";
 
 	/**
-	 * Create the application.
+	 * Create the application. <<<<<<< HEAD
 	 * 
 	 * @param validationService
+	 *            =======
+	 * @param validationService
+	 *            >>>>>>> 2c0224dd3814943461d71ac46b0c70cad05aeeaa
 	 */
-	public EditWindow(WindowController windowController,
-			PrimatijadaService service, ValidationService validationService) {
+	public EditWindow(WindowController windowController, PrimatijadaService service,
+			ValidationService validationService) {
 		this.service = service;
 		this.windowController = windowController;
 		this.validationService = validationService;
@@ -171,6 +177,7 @@ public class EditWindow extends Window {
 				} catch (NumberFormatException e1) {
 					indeksInputErrorOutputLabel.setText(NUMBER_FORMAT_ERROR);
 				} catch (RecordNotExistsException e1) {
+
 					System.out.println("Ne postoji");
 					indeksInputErrorOutputLabel
 							.setText(INDEKS_NOT_EXISTS_ERROR);
@@ -180,6 +187,7 @@ public class EditWindow extends Window {
 					indeksInputErrorOutputLabel.setText(INVALID_INPUT_FORMAT);
 				} catch (EmptyInputException e1) {
 					indeksInputErrorOutputLabel.setText(EMPTY_INPUT_ERROR);
+
 				}
 
 			}
@@ -405,8 +413,7 @@ public class EditWindow extends Window {
 		String category = null;
 
 		// finds which radio button is selected
-		for (Enumeration<AbstractButton> buttons = buttonGroup.getElements(); buttons
-				.hasMoreElements();) {
+		for (Enumeration<AbstractButton> buttons = buttonGroup.getElements(); buttons.hasMoreElements();) {
 			AbstractButton button = buttons.nextElement();
 
 			if (button.isSelected())

@@ -38,6 +38,7 @@ public class SignUpWindow extends Window {
 	private JLabel optionsInputErrorOutput;
 	private JLabel priceOutputLabel;
 
+
 	private boolean showOptions = false;
 	private static final int SHORT_OPTION_WIDTH = 10;
 	private static final int LONG_OPTION_WIDTH = 20;
@@ -90,6 +91,7 @@ public class SignUpWindow extends Window {
 
 				String category = null;
 
+
 				// finds which radio button is selected
 				for (Enumeration<AbstractButton> buttons = categoryRadioButtonGroup
 						.getElements(); buttons.hasMoreElements();) {
@@ -101,9 +103,11 @@ public class SignUpWindow extends Window {
 				}
 				optionsInputErrorOutput.setText("");
 
+
 				try {
 					validationService.checkOptionsInput(category,
 							optionInput.getText());
+
 				} catch (EmptyInputException e1) {
 					optionsInputErrorOutput.setText(EMPTY_INPUT_ERROR);
 				} catch (InvalidInputException e1) {
@@ -111,6 +115,7 @@ public class SignUpWindow extends Window {
 				} catch (InvalidInputFormatException e1) {
 					optionsInputErrorOutput.setText(INVALID_INPUT_FORMAT);
 				}
+
 
 			}
 		});
@@ -136,6 +141,7 @@ public class SignUpWindow extends Window {
 
 				indeksInputErrorOutput.setText("");
 				errorOutput.setText("");
+
 
 				String indeks = indeksInput.getText();
 				String category = null;
@@ -171,6 +177,7 @@ public class SignUpWindow extends Window {
 					}
 					
 					
+
 				} catch (NumberFormatException e1) {
 					indeksInputErrorOutput.setText(NUMBER_FORMAT_ERROR);
 				} catch (EmptyInputException e1) {
@@ -178,6 +185,7 @@ public class SignUpWindow extends Window {
 				} catch (RecordNotExistsException e1) {
 					updatePrice();
 				} catch (DataBaseBusyException e1) {
+
 					errorOutput.setText(DATA_BASE_BUSY_ERROR);
 				} catch (IndeksFormatException e1) {
 					indeksInputErrorOutput.setText(INVALID_INPUT_FORMAT);
@@ -345,9 +353,11 @@ public class SignUpWindow extends Window {
 				// Validation
 				try {
 					service.signUp(indeks, category, arrangement, options);
+
 					float price = service.calculatePrice(indeks, category,
 							arrangement);
 					priceOutputLabel.setText(price + " din");
+
 				} catch (PrimaryKeyTakenException e1) {
 					indeksInputErrorOutput.setText(INDEKS_TAKEN_ERROR);
 				} catch (NumberFormatException e2) {
@@ -376,8 +386,10 @@ public class SignUpWindow extends Window {
 		priceOutputPanel.setBounds(72, 283, 136, 29);
 		frame.getContentPane().add(priceOutputPanel);
 
+
 		priceOutputLabel = new JLabel("   ");
 		priceOutputPanel.add(priceOutputLabel);
+
 
 		/*---------------------*/
 
