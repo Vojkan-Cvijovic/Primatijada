@@ -4,6 +4,7 @@ import java.awt.EventQueue;
 
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.JButton;
@@ -16,6 +17,8 @@ import application.service.PrimatijadaService;
 import application.service.ValidationService;
 
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.awt.event.ActionEvent;
 import java.awt.Color;
 
@@ -24,16 +27,17 @@ public class CallOffWindow extends Window {
 	private WindowController windowController;
 	private JFrame frame;
 	private JTextField indeksInput;
-	private JLabel indeksErrorOutputLabel ;
-	private JLabel errorOutputLabel ;
+	private JLabel indeksErrorOutputLabel;
+	private JLabel errorOutputLabel;
 
-	public CallOffWindow(WindowController windowController,PrimatijadaService service, ValidationService validationService) {
+	public CallOffWindow(WindowController windowController, PrimatijadaService service,
+			ValidationService validationService) {
 		this.windowController = windowController;
 		this.service = service;
 		this.validationService = validationService;
 		initialize();
 	}
-	
+
 	public void run() {
 
 		EventQueue.invokeLater(new Runnable() {
@@ -110,7 +114,7 @@ public class CallOffWindow extends Window {
 					errorOutputLabel.setText(DATA_BASE_BUSY_ERROR);
 				} catch (EmptyInputException e1) {
 					indeksErrorOutputLabel.setText(EMPTY_INPUT_ERROR);
-				} 
+				}
 
 				System.out.println("Odjavi se");
 			}
@@ -122,16 +126,30 @@ public class CallOffWindow extends Window {
 		backButton.addActionListener(windowController);
 		backButton.setBounds(30, 13, 83, 25);
 		frame.getContentPane().add(backButton);
-		
+
 		indeksErrorOutputLabel = new JLabel("");
 		indeksErrorOutputLabel.setForeground(Color.RED);
 		indeksErrorOutputLabel.setBounds(346, 110, 183, 15);
 		frame.getContentPane().add(indeksErrorOutputLabel);
-		
+
 		errorOutputLabel = new JLabel("");
 		errorOutputLabel.setForeground(Color.RED);
 		errorOutputLabel.setBounds(346, 202, 183, 15);
 		frame.getContentPane().add(errorOutputLabel);
+
+		frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+		frame.addWindowListener(new WindowAdapter() {
+			@Override
+			public void windowClosing(WindowEvent e) {
+				String ObjButtons[] = { "Da", "Ne" };
+				int PromptResult = JOptionPane.showOptionDialog(null, "Da li ste sigurni ?", "",
+						JOptionPane.DEFAULT_OPTION, JOptionPane.WARNING_MESSAGE, null, ObjButtons, ObjButtons[1]);
+				if (PromptResult == JOptionPane.YES_OPTION) {
+					e.getWindow().dispose();
+					windowController.onWindowExit();
+				}
+			}
+		});
 
 	}
 

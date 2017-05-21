@@ -58,4 +58,11 @@ public class WindowController implements ActionListener{
 		
 	}
 
+	public void onWindowExit() {
+		
+		
+		System.exit(0);
+		
+	}
+
 }

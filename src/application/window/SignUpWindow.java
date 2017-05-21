@@ -4,6 +4,8 @@ import java.awt.Color;
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.util.Enumeration;
 
 import javax.swing.AbstractButton;
@@ -11,6 +13,7 @@ import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JSeparator;
@@ -38,7 +41,6 @@ public class SignUpWindow extends Window {
 	private JLabel optionsInputErrorOutput;
 	private JLabel priceOutputLabel;
 
-
 	private boolean showOptions = false;
 	private static final int SHORT_OPTION_WIDTH = 10;
 	private static final int LONG_OPTION_WIDTH = 20;
@@ -59,8 +61,8 @@ public class SignUpWindow extends Window {
 		});
 	}
 
-	public SignUpWindow(WindowController windowController,
-			PrimatijadaService service, ValidationService validationService) {
+	public SignUpWindow(WindowController windowController, PrimatijadaService service,
+			ValidationService validationService) {
 		this.service = service;
 		this.windowController = windowController;
 		this.validationService = validationService;
@@ -91,10 +93,9 @@ public class SignUpWindow extends Window {
 
 				String category = null;
 
-
 				// finds which radio button is selected
-				for (Enumeration<AbstractButton> buttons = categoryRadioButtonGroup
-						.getElements(); buttons.hasMoreElements();) {
+				for (Enumeration<AbstractButton> buttons = categoryRadioButtonGroup.getElements(); buttons
+						.hasMoreElements();) {
 					AbstractButton button = buttons.nextElement();
 
 					if (button.isSelected())
@@ -103,10 +104,8 @@ public class SignUpWindow extends Window {
 				}
 				optionsInputErrorOutput.setText("");
 
-
 				try {
-					validationService.checkOptionsInput(category,
-							optionInput.getText());
+					validationService.checkOptionsInput(category, optionInput.getText());
 
 				} catch (EmptyInputException e1) {
 					optionsInputErrorOutput.setText(EMPTY_INPUT_ERROR);
@@ -115,7 +114,6 @@ public class SignUpWindow extends Window {
 				} catch (InvalidInputFormatException e1) {
 					optionsInputErrorOutput.setText(INVALID_INPUT_FORMAT);
 				}
-
 
 			}
 		});
@@ -142,14 +140,13 @@ public class SignUpWindow extends Window {
 				indeksInputErrorOutput.setText("");
 				errorOutput.setText("");
 
-
 				String indeks = indeksInput.getText();
 				String category = null;
 				String arrangement = null;
 
 				// finds which radio button is selected
-				for (Enumeration<AbstractButton> buttons = categoryRadioButtonGroup
-						.getElements(); buttons.hasMoreElements();) {
+				for (Enumeration<AbstractButton> buttons = categoryRadioButtonGroup.getElements(); buttons
+						.hasMoreElements();) {
 					AbstractButton button = buttons.nextElement();
 
 					if (button.isSelected())
@@ -158,8 +155,8 @@ public class SignUpWindow extends Window {
 				}
 
 				// finds which radio button is selected
-				for (Enumeration<AbstractButton> buttons = arrangementButtonGroup
-						.getElements(); buttons.hasMoreElements();) {
+				for (Enumeration<AbstractButton> buttons = arrangementButtonGroup.getElements(); buttons
+						.hasMoreElements();) {
 					AbstractButton button = buttons.nextElement();
 
 					if (button.isSelected())
@@ -168,15 +165,11 @@ public class SignUpWindow extends Window {
 				}
 				boolean exists = false;
 				try {
-					exists = validationService
-							.checkIfIndeksExists(indeksInput.getText());
-					float price = service.calculatePrice(indeks, category,
-							arrangement);
+					exists = validationService.checkIfIndeksExists(indeksInput.getText());
+					float price = service.calculatePrice(indeks, category, arrangement);
 					if (exists) {
 						indeksInputErrorOutput.setText(INDEKS_TAKEN_ERROR);
 					}
-					
-					
 
 				} catch (NumberFormatException e1) {
 					indeksInputErrorOutput.setText(NUMBER_FORMAT_ERROR);
@@ -332,8 +325,8 @@ public class SignUpWindow extends Window {
 				String options = optionInput.getText();
 
 				// finds which radio button is selected
-				for (Enumeration<AbstractButton> buttons = categoryRadioButtonGroup
-						.getElements(); buttons.hasMoreElements();) {
+				for (Enumeration<AbstractButton> buttons = categoryRadioButtonGroup.getElements(); buttons
+						.hasMoreElements();) {
 					AbstractButton button = buttons.nextElement();
 
 					if (button.isSelected())
@@ -342,8 +335,8 @@ public class SignUpWindow extends Window {
 				}
 
 				// finds which radio button is selected
-				for (Enumeration<AbstractButton> buttons = arrangementButtonGroup
-						.getElements(); buttons.hasMoreElements();) {
+				for (Enumeration<AbstractButton> buttons = arrangementButtonGroup.getElements(); buttons
+						.hasMoreElements();) {
 					AbstractButton button = buttons.nextElement();
 
 					if (button.isSelected())
@@ -354,8 +347,7 @@ public class SignUpWindow extends Window {
 				try {
 					service.signUp(indeks, category, arrangement, options);
 
-					float price = service.calculatePrice(indeks, category,
-							arrangement);
+					float price = service.calculatePrice(indeks, category, arrangement);
 					priceOutputLabel.setText(price + " din");
 
 				} catch (PrimaryKeyTakenException e1) {
@@ -386,10 +378,8 @@ public class SignUpWindow extends Window {
 		priceOutputPanel.setBounds(72, 283, 136, 29);
 		frame.getContentPane().add(priceOutputPanel);
 
-
 		priceOutputLabel = new JLabel("   ");
 		priceOutputPanel.add(priceOutputLabel);
-
 
 		/*---------------------*/
 
@@ -419,6 +409,20 @@ public class SignUpWindow extends Window {
 		errorOutput.setBounds(394, 326, 142, 15);
 		frame.getContentPane().add(errorOutput);
 
+		frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+		frame.addWindowListener(new WindowAdapter() {
+			@Override
+			public void windowClosing(WindowEvent e) {
+				String ObjButtons[] = { "Da", "Ne" };
+				int PromptResult = JOptionPane.showOptionDialog(null, "Da li ste sigurni ?", "",
+						JOptionPane.DEFAULT_OPTION, JOptionPane.WARNING_MESSAGE, null, ObjButtons, ObjButtons[1]);
+				if (PromptResult == JOptionPane.YES_OPTION) {
+					e.getWindow().dispose();
+					windowController.onWindowExit();
+				}
+			}
+		});
+
 	}
 
 	public void hideWindow() {
@@ -432,8 +436,7 @@ public class SignUpWindow extends Window {
 		String arrangement = null;
 
 		// finds which radio button is selected
-		for (Enumeration<AbstractButton> buttons = categoryRadioButtonGroup
-				.getElements(); buttons.hasMoreElements();) {
+		for (Enumeration<AbstractButton> buttons = categoryRadioButtonGroup.getElements(); buttons.hasMoreElements();) {
 			AbstractButton button = buttons.nextElement();
 
 			if (button.isSelected())
@@ -442,8 +445,7 @@ public class SignUpWindow extends Window {
 		}
 
 		// finds which radio button is selected
-		for (Enumeration<AbstractButton> buttons = arrangementButtonGroup
-				.getElements(); buttons.hasMoreElements();) {
+		for (Enumeration<AbstractButton> buttons = arrangementButtonGroup.getElements(); buttons.hasMoreElements();) {
 			AbstractButton button = buttons.nextElement();
 
 			if (button.isSelected())

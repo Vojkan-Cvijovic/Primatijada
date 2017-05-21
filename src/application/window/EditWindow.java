@@ -3,12 +3,15 @@ package application.window;
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.util.Enumeration;
 import javax.swing.AbstractButton;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JSeparator;
@@ -49,12 +52,7 @@ public class EditWindow extends Window {
 	private static final String PAPERWORK_LABEL = "Rad";
 
 	/**
-	 * Create the application. <<<<<<< HEAD
-	 * 
-	 * @param validationService
-	 *            =======
-	 * @param validationService
-	 *            >>>>>>> 2c0224dd3814943461d71ac46b0c70cad05aeeaa
+	 * Create the application.
 	 */
 	public EditWindow(WindowController windowController, PrimatijadaService service,
 			ValidationService validationService) {
@@ -90,8 +88,7 @@ public class EditWindow extends Window {
 				optionsInputErrorOutputLabel.setText("");
 
 				// finds which radio button is selected
-				for (Enumeration<AbstractButton> buttons = buttonGroup
-						.getElements(); buttons.hasMoreElements();) {
+				for (Enumeration<AbstractButton> buttons = buttonGroup.getElements(); buttons.hasMoreElements();) {
 					AbstractButton button = buttons.nextElement();
 
 					if (button.isSelected())
@@ -101,8 +98,7 @@ public class EditWindow extends Window {
 				optionsInputErrorOutputLabel.setText("");
 
 				try {
-					validationService.checkOptionsInput(category,
-							optionInput.getText());
+					validationService.checkOptionsInput(category, optionInput.getText());
 				} catch (EmptyInputException e1) {
 					optionsInputErrorOutputLabel.setText(EMPTY_INPUT_ERROR);
 				} catch (InvalidInputException e1) {
@@ -144,8 +140,7 @@ public class EditWindow extends Window {
 				String tag = null;
 
 				try {
-					primatijada = service.retrievePrimatijada(indeksInput
-							.getText());
+					primatijada = service.retrievePrimatijada(indeksInput.getText());
 
 					switch (primatijada.getTip()) {
 					case 's':
@@ -156,8 +151,7 @@ public class EditWindow extends Window {
 						tag = "Navijac";
 					}
 					// searching which button to activate
-					for (Enumeration<AbstractButton> buttons = buttonGroup
-							.getElements(); buttons.hasMoreElements();) {
+					for (Enumeration<AbstractButton> buttons = buttonGroup.getElements(); buttons.hasMoreElements();) {
 						AbstractButton button = buttons.nextElement();
 
 						if (button.getText().equalsIgnoreCase(tag)) {
@@ -179,8 +173,7 @@ public class EditWindow extends Window {
 				} catch (RecordNotExistsException e1) {
 
 					System.out.println("Ne postoji");
-					indeksInputErrorOutputLabel
-							.setText(INDEKS_NOT_EXISTS_ERROR);
+					indeksInputErrorOutputLabel.setText(INDEKS_NOT_EXISTS_ERROR);
 				} catch (DataBaseBusyException e1) {
 					errorOutputLabel.setText(DATA_BASE_BUSY_ERROR);
 				} catch (IndeksFormatException e1) {
@@ -284,8 +277,7 @@ public class EditWindow extends Window {
 				String category = null;
 				String options = optionInput.getText();
 
-				for (Enumeration<AbstractButton> buttons = buttonGroup
-						.getElements(); buttons.hasMoreElements();) {
+				for (Enumeration<AbstractButton> buttons = buttonGroup.getElements(); buttons.hasMoreElements();) {
 					AbstractButton button = buttons.nextElement();
 
 					if (button.isSelected())
@@ -300,8 +292,7 @@ public class EditWindow extends Window {
 				} catch (NumberFormatException e1) {
 					indeksInputErrorOutputLabel.setText(NUMBER_FORMAT_ERROR);
 				} catch (RecordNotExistsException e1) {
-					indeksInputErrorOutputLabel
-							.setText(INDEKS_NOT_EXISTS_ERROR);
+					indeksInputErrorOutputLabel.setText(INDEKS_NOT_EXISTS_ERROR);
 				} catch (IndeksFormatException e1) {
 					indeksInputErrorOutputLabel.setText(INVALID_INPUT_FORMAT);
 				} catch (EmptyInputException e1) {
@@ -345,6 +336,20 @@ public class EditWindow extends Window {
 
 		priceOutputLabel = new JLabel("   ");
 		priceOutputPanel.add(priceOutputLabel);
+
+		frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+		frame.addWindowListener(new WindowAdapter() {
+			@Override
+			public void windowClosing(WindowEvent e) {
+				String ObjButtons[] = { "Da", "Ne" };
+				int PromptResult = JOptionPane.showOptionDialog(null, "Da li ste sigurni ?", "",
+						JOptionPane.DEFAULT_OPTION, JOptionPane.WARNING_MESSAGE, null, ObjButtons, ObjButtons[1]);
+				if (PromptResult == JOptionPane.YES_OPTION) {
+					e.getWindow().dispose();
+					windowController.onWindowExit();
+				}
+			}
+		});
 
 	}
 
