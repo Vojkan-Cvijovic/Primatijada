@@ -355,8 +355,7 @@ public class SignUpWindow extends Window {
 				} catch (NumberFormatException e2) {
 					indeksInputErrorOutput.setText(NUMBER_FORMAT_ERROR);
 				} catch (EmptyInputException e1) {
-				} catch (RecordNotExistsException e1) {
-				} catch (DataBaseBusyException e1) {
+				}catch (DataBaseBusyException e1) {
 					errorOutput.setText(DATA_BASE_BUSY_ERROR);
 				} catch (IndeksFormatException e1) {
 					indeksInputErrorOutput.setText(INVALID_INPUT_FORMAT);
