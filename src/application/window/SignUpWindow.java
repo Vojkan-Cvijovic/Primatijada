@@ -80,7 +80,7 @@ public class SignUpWindow extends Window {
 
 		frame = new JFrame();
 		frame.setResizable(false);
-		frame.setTitle("");
+		frame.setTitle(TITLE);
 		frame.setBounds(100, 100, 600, 380);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.getContentPane().setLayout(null);

@@ -26,7 +26,6 @@ public class Primatijada {
 		System.out.println("Initializing Model");
 		indeks = 0;
 		godina = Calendar.getInstance().get(Calendar.YEAR);
-		System.out.println(godina);
 		tip = 's';
 		sport = null;
 		rad = null;
@@ -79,6 +78,36 @@ public class Primatijada {
 
 	public void setAranzman(char aranzman) {
 		this.aranzman = aranzman;
+	}
+
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		
+		sb.append(indeks + "     " + godina + "	 ");
+		switch (tip) {
+		case 's':
+			sb.append(" spotista, prijavljen sport: " + sport);
+			break;
+		case 'n':
+			sb.append(" naucnik, prijavljen rad: " + rad);
+			break;
+		default:
+			sb.append(" navijac");
+			break;
+		}
+		
+		switch (aranzman) {
+		case 'c':
+			sb.append("	 ceo aranzman");
+			break;
+
+		default:
+			sb.append("  pola aranzmana");
+			break;
+		}
+		
+		return sb.toString();
 	}
 
 }

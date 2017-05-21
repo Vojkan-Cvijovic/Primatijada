@@ -6,6 +6,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Calendar;
+import java.util.LinkedList;
+import java.util.List;
 
 import application.exception.DataBaseBusyException;
 import application.exception.PrimaryKeyTakenException;
@@ -221,10 +223,8 @@ public class PrimatijadaRepositoryImplementation implements
 
 	}
 
-
 	public Primatijada retrieve(int indeks) throws RecordNotExistsException,
 			DataBaseBusyException {
-
 
 		System.out.println("Retrieves data from table " + TABLE_NAME);
 
@@ -240,7 +240,6 @@ public class PrimatijadaRepositoryImplementation implements
 		}
 		return primatijada;
 	}
-
 
 	private Primatijada retriveAction(int indeks, Connection connection,
 			int times) throws SQLException, RecordNotExistsException,
@@ -270,14 +269,13 @@ public class PrimatijadaRepositoryImplementation implements
 			if (resultSet.next()) {
 				primatijada.setIndeks(resultSet.getInt(1));
 				primatijada.setGodina(resultSet.getInt(2));
-				primatijada.setTip((char) resultSet.getShort(3));
+				primatijada.setTip(resultSet.getString(3).charAt(0));
 				primatijada.setSport(resultSet.getString(4));
 				primatijada.setRad(resultSet.getString(5));
-				primatijada.setAranzman((char) resultSet.getShort(6));
+				primatijada.setAranzman(resultSet.getString(6).charAt(0));
 			} else {
 				System.out.println("indeks " + indeks);
 				throw new RecordNotExistsException();
-
 
 			}
 		} catch (SQLException e) {
@@ -331,16 +329,16 @@ public class PrimatijadaRepositoryImplementation implements
 			ResultSet resultSet = preparedStatement.executeQuery();
 			System.out.println("executed query");
 			int godina = Calendar.getInstance().get(Calendar.YEAR);
-			while(resultSet.next()){
+			while (resultSet.next()) {
 				System.out.println("Godina ");
 				int g = resultSet.getInt(1);
-				if(g != godina)
+				if (g != godina)
 					break;
 				godina--;
 				count++;
-				
+
 			}
-			if(count == 0){
+			if (count == 0) {
 				System.out.println("fist time for indeks " + indeks);
 				throw new RecordNotExistsException();
 			}
@@ -356,6 +354,73 @@ public class PrimatijadaRepositoryImplementation implements
 			}
 		}
 		return count;
+	}
+
+	@Override
+	public List<Primatijada> retriveAllForCurrentYear()
+			throws DataBaseBusyException {
+
+		System.out.println("Preparing for retriving all ...");
+		Connection connection = connectionManager.connect();
+		List<Primatijada> list = null;
+		try {
+			list = retriceAllForCurrentYearAction(connection, 0);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			connectionManager.disconnect();
+		}
+
+		return list;
+	}
+
+	private List<Primatijada> retriceAllForCurrentYearAction(
+			Connection connection, int times) throws SQLException,
+			DataBaseBusyException {
+
+		if (times > TRY_COUNT_LIMIT) {
+			System.out
+					.println("Reached maximum count of atempts to write in db");
+			throw new DataBaseBusyException();
+		}
+
+		PreparedStatement preparedStatement;
+		List<Primatijada> list = null;
+
+		try {
+			preparedStatement = connection.prepareStatement(RETRIVE_ALL_SQL);
+			int year = Calendar.getInstance().get(Calendar.YEAR);
+			preparedStatement.setInt(1, year);
+
+			ResultSet resultSet = preparedStatement.executeQuery();
+			list = new LinkedList<>();
+			while (resultSet.next()) {
+				// Loading model
+				System.out.println("Adding in list ");
+				Primatijada primatijada = new Primatijada();
+				
+				primatijada.setIndeks(resultSet.getInt(1));
+				primatijada.setGodina(resultSet.getInt(2));
+				primatijada.setTip(resultSet.getString(3).charAt(0));
+				primatijada.setSport(resultSet.getString(4));
+				primatijada.setRad(resultSet.getString(5));
+				primatijada.setAranzman(resultSet.getString(6).charAt(0));
+				
+				
+				System.out.println("adding indeks " + primatijada.getIndeks());
+				list.add(primatijada);
+			}
+		} catch (SQLException e) {
+			if (e.getErrorCode() == -911 || e.getErrorCode() == -913) {
+				System.out.println("ERROR SQLCODE: " + e.getErrorCode()
+						+ " Database busy, rollback and try again ...");
+
+				connection.rollback();
+				list = retriceAllForCurrentYearAction(connection, times++);
+			}
+
+		}
+		return list;
 	}
 
 }

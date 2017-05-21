@@ -1,5 +1,7 @@
 package application.repository;
 
+import java.util.List;
+
 import application.exception.DataBaseBusyException;
 import application.exception.PrimaryKeyTakenException;
 import application.exception.RecordNotExistsException;
@@ -34,7 +36,8 @@ public interface PrimatijadaRepository {
 			+ " where indeks = ? and godina = ?";
 	public static final String COUNT_SQL = "select godina from " + TABLE_NAME
 			+ " where indeks = ? order by 1 desc";
-
+	public static final String RETRIVE_ALL_SQL = "select * from " + TABLE_NAME
+			+ " where godina = ? ";
 
 	/***************************************************************************************/
 
@@ -53,4 +56,6 @@ public interface PrimatijadaRepository {
 	public int getCountOfRecords(int indeks) throws RecordNotExistsException,
 			DataBaseBusyException;
 
+	public List<Primatijada> retriveAllForCurrentYear()
+			throws DataBaseBusyException;
 }

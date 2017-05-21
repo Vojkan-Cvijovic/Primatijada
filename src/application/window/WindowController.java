@@ -2,6 +2,9 @@ package application.window;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+
+import application.exception.DataBaseBusyException;
+import application.service.LoggingService;
 import application.service.PrimatijadaService;
 import application.service.ValidationService;
 
@@ -16,6 +19,7 @@ public class WindowController implements ActionListener{
 	private EditWindow editWindow;
 	private PrimatijadaService service;
 	private ValidationService validationService;
+	private LoggingService loggingService;
 	
 	private static final String BACK_BUTTON = "Nazad";
 	private static final String CALL_OFF_BUTTON = "Odjava";
@@ -31,7 +35,7 @@ public class WindowController implements ActionListener{
 		callOffWindow = new CallOffWindow(this, service, validationService);
 		signUpWindow = new SignUpWindow(this, service, validationService);
 		editWindow = new EditWindow(this, service, validationService);
-		
+		loggingService = new LoggingService();
 	}
 
 	/* Detects which ActionEvent is invoked and responds to it*/
@@ -60,7 +64,11 @@ public class WindowController implements ActionListener{
 
 	public void onWindowExit() {
 		
-		
+		try {
+			loggingService.makeReport();
+		} catch (DataBaseBusyException e) {
+			System.out.println("Data base busy, failed to make report");
+		}
 		System.exit(0);
 		
 	}
