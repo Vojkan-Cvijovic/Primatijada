@@ -61,8 +61,8 @@ public class SignUpWindow extends Window {
 		});
 	}
 
-	public SignUpWindow(WindowController windowController,
-			PrimatijadaService service, ValidationService validationService) {
+	public SignUpWindow(WindowController windowController, PrimatijadaService service,
+			ValidationService validationService) {
 		this.service = service;
 		this.windowController = windowController;
 		this.validationService = validationService;
@@ -95,8 +95,8 @@ public class SignUpWindow extends Window {
 				errorOutputLabel.setText("");
 
 				// finds which radio button is selected
-				for (Enumeration<AbstractButton> buttons = categoryRadioButtonGroup
-						.getElements(); buttons.hasMoreElements();) {
+				for (Enumeration<AbstractButton> buttons = categoryRadioButtonGroup.getElements(); buttons
+						.hasMoreElements();) {
 					AbstractButton button = buttons.nextElement();
 
 					if (button.isSelected())
@@ -106,8 +106,7 @@ public class SignUpWindow extends Window {
 				optionsInputErrorOutputLabel.setText("");
 
 				try {
-					validationService.checkOptionsInput(category,
-							optionInput.getText());
+					validationService.checkOptionsInput(category, optionInput.getText());
 
 				} catch (EmptyInputException e1) {
 					optionsInputErrorOutputLabel.setText(EMPTY_INPUT_ERROR);
@@ -145,8 +144,7 @@ public class SignUpWindow extends Window {
 				boolean exists = false;
 
 				try {
-					exists = validationService.checkIfIndeksExists(indeksInput
-							.getText());
+					exists = validationService.checkIfIndeksExists(indeksInput.getText());
 
 					if (exists) {
 						indeksInputErrorOutputLabel.setText(INDEKS_TAKEN_ERROR);
@@ -311,8 +309,8 @@ public class SignUpWindow extends Window {
 				optionsInputErrorOutputLabel.setText("");
 
 				// finds which radio button is selected
-				for (Enumeration<AbstractButton> buttons = categoryRadioButtonGroup
-						.getElements(); buttons.hasMoreElements();) {
+				for (Enumeration<AbstractButton> buttons = categoryRadioButtonGroup.getElements(); buttons
+						.hasMoreElements();) {
 					AbstractButton button = buttons.nextElement();
 
 					if (button.isSelected())
@@ -321,8 +319,8 @@ public class SignUpWindow extends Window {
 				}
 
 				// finds which radio button is selected
-				for (Enumeration<AbstractButton> buttons = arrangementButtonGroup
-						.getElements(); buttons.hasMoreElements();) {
+				for (Enumeration<AbstractButton> buttons = arrangementButtonGroup.getElements(); buttons
+						.hasMoreElements();) {
 					AbstractButton button = buttons.nextElement();
 
 					if (button.isSelected())
@@ -333,33 +331,33 @@ public class SignUpWindow extends Window {
 				try {
 					service.signUp(indeks, category, arrangement, options);
 
-					float price = service.calculatePrice(indeks, category,
-							arrangement);
+					float price = service.calculatePrice(indeks, category, arrangement);
 					priceOutputLabel.setText(price + " $");
 					errorOutputLabel.setForeground(Color.GREEN);
 					errorOutputLabel.setText("Uspesno ste se prijavili!");
-					
+
 				} catch (PrimaryKeyTakenException e1) {
 					indeksInputErrorOutputLabel.setText(INDEKS_TAKEN_ERROR);
 				} catch (NumberFormatException e2) {
 					indeksInputErrorOutputLabel.setText(NUMBER_FORMAT_ERROR);
 				} catch (EmptyInputException e1) {
+
 					if (indeks.trim().equalsIgnoreCase(""))
 						indeksInputErrorOutputLabel.setText(EMPTY_INPUT_ERROR);
 
-					if (!category.equalsIgnoreCase("Navijac")
-							&& options.trim().equalsIgnoreCase(""))
+					if (!category.equalsIgnoreCase("Navijac") && options.trim().equalsIgnoreCase(""))
 						optionsInputErrorOutputLabel.setText(EMPTY_INPUT_ERROR);
 				} catch (DataBaseBusyException e1) {
 					errorOutputLabel.setForeground(Color.RED);
 					errorOutputLabel.setText(DATA_BASE_BUSY_ERROR);
+
 				} catch (IndeksFormatException e1) {
 					indeksInputErrorOutputLabel.setText(INVALID_INPUT_FORMAT);
 				} catch (InvalidInputFormatException e1) {
 					optionsInputErrorOutputLabel.setText(INVALID_INPUT_FORMAT);
 				} catch (InvalidInputLengthException e1) {
 					optionsInputErrorOutputLabel.setText(INPUT_TOO_LONG);
-				} 
+				}
 			}
 		});
 		signupPanel.add(signupButton);
@@ -411,10 +409,8 @@ public class SignUpWindow extends Window {
 			@Override
 			public void windowClosing(WindowEvent e) {
 				String ObjButtons[] = { "Da", "Ne" };
-				int PromptResult = JOptionPane.showOptionDialog(null,
-						"Da li ste sigurni ?", "", JOptionPane.DEFAULT_OPTION,
-						JOptionPane.WARNING_MESSAGE, null, ObjButtons,
-						ObjButtons[1]);
+				int PromptResult = JOptionPane.showOptionDialog(null, "Da li ste sigurni ?", "",
+						JOptionPane.DEFAULT_OPTION, JOptionPane.WARNING_MESSAGE, null, ObjButtons, ObjButtons[1]);
 				if (PromptResult == JOptionPane.YES_OPTION) {
 					e.getWindow().dispose();
 					windowController.onWindowExit();
@@ -435,8 +431,7 @@ public class SignUpWindow extends Window {
 		String arrangement = null;
 
 		// finds which radio button is selected
-		for (Enumeration<AbstractButton> buttons = categoryRadioButtonGroup
-				.getElements(); buttons.hasMoreElements();) {
+		for (Enumeration<AbstractButton> buttons = categoryRadioButtonGroup.getElements(); buttons.hasMoreElements();) {
 			AbstractButton button = buttons.nextElement();
 
 			if (button.isSelected())
@@ -445,8 +440,7 @@ public class SignUpWindow extends Window {
 		}
 
 		// finds which radio button is selected
-		for (Enumeration<AbstractButton> buttons = arrangementButtonGroup
-				.getElements(); buttons.hasMoreElements();) {
+		for (Enumeration<AbstractButton> buttons = arrangementButtonGroup.getElements(); buttons.hasMoreElements();) {
 			AbstractButton button = buttons.nextElement();
 
 			if (button.isSelected())
@@ -461,7 +455,7 @@ public class SignUpWindow extends Window {
 		} catch (IndeksFormatException e1) {
 			indeksInputErrorOutputLabel.setText(INVALID_INPUT_FORMAT);
 		} catch (DataBaseBusyException e1) {
-			
+
 			errorOutputLabel.setForeground(Color.RED);
 			errorOutputLabel.setText(DATA_BASE_BUSY_ERROR);
 		} catch (EmptyInputException e1) {

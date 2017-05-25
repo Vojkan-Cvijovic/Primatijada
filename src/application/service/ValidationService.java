@@ -95,4 +95,14 @@ public class ValidationService {
 		return true;
 	}
 
+
+	public boolean checkIfExists(Primatijada primatijada) throws DataBaseBusyException {
+		try {
+			repository.retrieve(primatijada.getIndeks());
+		} catch (RecordNotExistsException e) {
+			return false;
+		}
+		return true;
+	}
+
 }
