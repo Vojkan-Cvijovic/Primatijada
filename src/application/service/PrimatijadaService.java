@@ -45,10 +45,12 @@ public class PrimatijadaService {
 			String arrangement, String options)
 			throws PrimaryKeyTakenException, NumberFormatException,
 			EmptyInputException, DataBaseBusyException, IndeksFormatException,
+
 			InvalidInputFormatException, InvalidInputLengthException{
 		
 		validationService.checkIndeksFormat(indeksString);
 		validationService.checkOptionsInput(category, options);
+
 
 		int indeks = Integer.parseInt(indeksString);
 		Primatijada primatijada = new Primatijada();
@@ -74,6 +76,7 @@ public class PrimatijadaService {
 		else
 			throw new PrimaryKeyTakenException();
 		
+
 	}
 
 	public void updateRecord(String indeksString, String category,
@@ -111,6 +114,7 @@ public class PrimatijadaService {
 		validationService.checkIndeksFormat(indeksString);
 		validationService.checkIfIndeksExists(indeksString);
 		
+
 		int indeks = Integer.parseInt(indeksString);
 		repository.delete(indeks);
 	}
