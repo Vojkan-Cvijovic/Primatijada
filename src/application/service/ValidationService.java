@@ -3,7 +3,7 @@ package application.service;
 import application.exception.DataBaseBusyException;
 import application.exception.EmptyInputException;
 import application.exception.IndeksFormatException;
-import application.exception.InvalidInputException;
+import application.exception.InvalidInputLengthException;
 import application.exception.InvalidInputFormatException;
 import application.exception.RecordNotExistsException;
 import application.model.Primatijada;
@@ -18,11 +18,10 @@ public class ValidationService {
 		repository = new PrimatijadaRepositoryImplementation();
 	}
 
-
 	public boolean checkIfIndeksExists(String text) throws EmptyInputException,
 
-			NumberFormatException, RecordNotExistsException,
-			DataBaseBusyException, IndeksFormatException {
+	NumberFormatException, RecordNotExistsException, DataBaseBusyException,
+			IndeksFormatException {
 
 		if (text.trim().isEmpty())
 			throw new EmptyInputException();
@@ -39,19 +38,22 @@ public class ValidationService {
 	}
 
 	public void checkOptionsInput(String category, String text)
-			throws EmptyInputException, InvalidInputException,
+			throws EmptyInputException, InvalidInputLengthException,
 			InvalidInputFormatException {
+
+		if (category.equalsIgnoreCase("Navijac"))
+			return;
 
 		if (text.trim().isEmpty())
 			throw new EmptyInputException();
 		if (category.equalsIgnoreCase("Sportista")) {
 			if (text.length() > 20)
-				throw new InvalidInputException();
+				throw new InvalidInputLengthException();
 		} else if (category.equalsIgnoreCase("Naucnik")) {
 			if (text.length() > 60)
-				throw new InvalidInputException();
+				throw new InvalidInputLengthException();
 		}
-		if (!text.matches("([a-z]|[A-Z])+"))
+		if (!text.matches("([a-z]|[A-Z]|[ ])+"))
 			throw new InvalidInputFormatException();
 
 	}
@@ -81,7 +83,16 @@ public class ValidationService {
 		if (!indeksText.matches("([0-9]){5}"))
 			throw new IndeksFormatException();
 
+	}
 
+	public boolean checkIfExists(Primatijada primatijada)
+			throws DataBaseBusyException {
+		try {
+			repository.retrieve(primatijada.getIndeks());
+		} catch (RecordNotExistsException e) {
+			return false;
+		}
+		return true;
 	}
 
 }

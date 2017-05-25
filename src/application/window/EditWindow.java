@@ -21,7 +21,7 @@ import application.exception.DataBaseBusyException;
 
 import application.exception.EmptyInputException;
 import application.exception.IndeksFormatException;
-import application.exception.InvalidInputException;
+import application.exception.InvalidInputLengthException;
 import application.exception.InvalidInputFormatException;
 
 import application.exception.RecordNotExistsException;
@@ -54,8 +54,8 @@ public class EditWindow extends Window {
 	/**
 	 * Create the application.
 	 */
-	public EditWindow(WindowController windowController, PrimatijadaService service,
-			ValidationService validationService) {
+	public EditWindow(WindowController windowController,
+			PrimatijadaService service, ValidationService validationService) {
 		this.service = service;
 		this.windowController = windowController;
 		this.validationService = validationService;
@@ -88,7 +88,8 @@ public class EditWindow extends Window {
 				optionsInputErrorOutputLabel.setText("");
 
 				// finds which radio button is selected
-				for (Enumeration<AbstractButton> buttons = buttonGroup.getElements(); buttons.hasMoreElements();) {
+				for (Enumeration<AbstractButton> buttons = buttonGroup
+						.getElements(); buttons.hasMoreElements();) {
 					AbstractButton button = buttons.nextElement();
 
 					if (button.isSelected())
@@ -98,10 +99,11 @@ public class EditWindow extends Window {
 				optionsInputErrorOutputLabel.setText("");
 
 				try {
-					validationService.checkOptionsInput(category, optionInput.getText());
+					validationService.checkOptionsInput(category,
+							optionInput.getText());
 				} catch (EmptyInputException e1) {
 					optionsInputErrorOutputLabel.setText(EMPTY_INPUT_ERROR);
-				} catch (InvalidInputException e1) {
+				} catch (InvalidInputLengthException e1) {
 					optionsInputErrorOutputLabel.setText(INPUT_TOO_LONG);
 				} catch (InvalidInputFormatException e1) {
 					optionsInputErrorOutputLabel.setText(INVALID_INPUT_FORMAT);
@@ -140,26 +142,31 @@ public class EditWindow extends Window {
 				String tag = null;
 
 				try {
-					primatijada = service.retrievePrimatijada(indeksInput.getText());
+					primatijada = service.retrievePrimatijada(indeksInput
+							.getText());
 
-					switch (primatijada.getTip()) {
+					switch ((char) primatijada.getTip()) {
 					case 's':
-						tag = SPORT_LABEL;
+						tag = "Sportista";
+						break;
 					case 'n':
-						tag = PAPERWORK_LABEL;
-					default:
+						tag = "Naucnik";
+						break;
+					case 'x':
 						tag = "Navijac";
+						break;
 					}
 					// searching which button to activate
-					for (Enumeration<AbstractButton> buttons = buttonGroup.getElements(); buttons.hasMoreElements();) {
+					for (Enumeration<AbstractButton> buttons = buttonGroup
+							.getElements(); buttons.hasMoreElements();) {
 						AbstractButton button = buttons.nextElement();
 
 						if (button.getText().equalsIgnoreCase(tag)) {
 							button.setSelected(true);
-							if (tag.equalsIgnoreCase(SPORT_LABEL)) {
+							if (tag.equalsIgnoreCase("Sportista")) {
 								sportOption(primatijada);
 								updatePrice();
-							} else if (tag.equalsIgnoreCase(PAPERWORK_LABEL)) {
+							} else if (tag.equalsIgnoreCase("Naucnik")) {
 								scienceOption(primatijada);
 								updatePrice();
 							} else {
@@ -171,10 +178,12 @@ public class EditWindow extends Window {
 				} catch (NumberFormatException e1) {
 					indeksInputErrorOutputLabel.setText(NUMBER_FORMAT_ERROR);
 				} catch (RecordNotExistsException e1) {
-
 					System.out.println("Ne postoji");
-					indeksInputErrorOutputLabel.setText(INDEKS_NOT_EXISTS_ERROR);
+					indeksInputErrorOutputLabel
+							.setText(INDEKS_NOT_EXISTS_ERROR);
 				} catch (DataBaseBusyException e1) {
+					
+					errorOutputLabel.setForeground(Color.RED);
 					errorOutputLabel.setText(DATA_BASE_BUSY_ERROR);
 				} catch (IndeksFormatException e1) {
 					indeksInputErrorOutputLabel.setText(INVALID_INPUT_FORMAT);
@@ -209,6 +218,7 @@ public class EditWindow extends Window {
 		categoryRB_2.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				sportOption();
+
 				updatePrice();
 			}
 		});
@@ -219,6 +229,7 @@ public class EditWindow extends Window {
 		categoryRB_3.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				scienceOption();
+
 				updatePrice();
 			}
 		});
@@ -277,7 +288,8 @@ public class EditWindow extends Window {
 				String category = null;
 				String options = optionInput.getText();
 
-				for (Enumeration<AbstractButton> buttons = buttonGroup.getElements(); buttons.hasMoreElements();) {
+				for (Enumeration<AbstractButton> buttons = buttonGroup
+						.getElements(); buttons.hasMoreElements();) {
 					AbstractButton button = buttons.nextElement();
 
 					if (button.isSelected())
@@ -289,19 +301,29 @@ public class EditWindow extends Window {
 					service.updateRecord(indeks, category, options);
 					float price = service.calculatePrice(indeks, category);
 					priceOutputLabel.setText(price + " $");
+					errorOutputLabel.setForeground(Color.GREEN);
+					errorOutputLabel.setText("Uspesno ste izmenili!");
+
 				} catch (NumberFormatException e1) {
 					indeksInputErrorOutputLabel.setText(NUMBER_FORMAT_ERROR);
 				} catch (RecordNotExistsException e1) {
-					indeksInputErrorOutputLabel.setText(INDEKS_NOT_EXISTS_ERROR);
+					indeksInputErrorOutputLabel
+							.setText(INDEKS_NOT_EXISTS_ERROR);
 				} catch (IndeksFormatException e1) {
 					indeksInputErrorOutputLabel.setText(INVALID_INPUT_FORMAT);
 				} catch (EmptyInputException e1) {
-					optionsInputErrorOutputLabel.setText(EMPTY_INPUT_ERROR);
-				} catch (InvalidInputException e1) {
+					if (indeks.trim().equalsIgnoreCase(""))
+						indeksInputErrorOutputLabel.setText(EMPTY_INPUT_ERROR);
+
+					if (!category.equalsIgnoreCase("Navijac")
+							&& options.trim().equalsIgnoreCase(""))
+						optionsInputErrorOutputLabel.setText(EMPTY_INPUT_ERROR);
+				} catch (InvalidInputLengthException e1) {
 					optionsInputErrorOutputLabel.setText(INPUT_TOO_LONG);
 				} catch (InvalidInputFormatException e1) {
 					optionsInputErrorOutputLabel.setText(INVALID_INPUT_FORMAT);
 				} catch (DataBaseBusyException e1) {
+					errorOutputLabel.setForeground(Color.RED);
 					errorOutputLabel.setText(DATA_BASE_BUSY_ERROR);
 				}
 
@@ -342,8 +364,10 @@ public class EditWindow extends Window {
 			@Override
 			public void windowClosing(WindowEvent e) {
 				String ObjButtons[] = { "Da", "Ne" };
-				int PromptResult = JOptionPane.showOptionDialog(null, "Da li ste sigurni ?", "",
-						JOptionPane.DEFAULT_OPTION, JOptionPane.WARNING_MESSAGE, null, ObjButtons, ObjButtons[1]);
+				int PromptResult = JOptionPane.showOptionDialog(null,
+						"Da li ste sigurni ?", "", JOptionPane.DEFAULT_OPTION,
+						JOptionPane.WARNING_MESSAGE, null, ObjButtons,
+						ObjButtons[1]);
 				if (PromptResult == JOptionPane.YES_OPTION) {
 					e.getWindow().dispose();
 					windowController.onWindowExit();
@@ -387,6 +411,7 @@ public class EditWindow extends Window {
 		optionLabel.setText(SPORT_LABEL);
 		optionInput.setVisible(showOptions);
 		optionInput.setColumns(SHORT_OPTION_WIDTH);
+		optionInput.setText("");
 	}
 
 	private void scienceOption(Primatijada primatijada) {
@@ -404,12 +429,14 @@ public class EditWindow extends Window {
 		optionLabel.setText(PAPERWORK_LABEL);
 		optionInput.setVisible(showOptions);
 		optionInput.setColumns(LONG_OPTION_WIDTH);
+		optionInput.setText("");
 	}
 
 	private void defaultOption() {
 		showOptions = false;
 		optionLabel.setVisible(showOptions);
 		optionInput.setVisible(showOptions);
+		optionInput.setText("");
 	}
 
 	private void updatePrice() {
@@ -418,7 +445,8 @@ public class EditWindow extends Window {
 		String category = null;
 
 		// finds which radio button is selected
-		for (Enumeration<AbstractButton> buttons = buttonGroup.getElements(); buttons.hasMoreElements();) {
+		for (Enumeration<AbstractButton> buttons = buttonGroup.getElements(); buttons
+				.hasMoreElements();) {
 			AbstractButton button = buttons.nextElement();
 
 			if (button.isSelected())
@@ -433,8 +461,9 @@ public class EditWindow extends Window {
 		} catch (IndeksFormatException e1) {
 			indeksInputErrorOutputLabel.setText(INVALID_INPUT_FORMAT);
 		} catch (RecordNotExistsException e1) {
-
+			priceOutputLabel.setText("");
 		} catch (DataBaseBusyException e1) {
+			errorOutputLabel.setForeground(Color.RED);
 			errorOutputLabel.setText(DATA_BASE_BUSY_ERROR);
 		} catch (EmptyInputException e1) {
 			indeksInputErrorOutputLabel.setText(EMPTY_INPUT_ERROR);

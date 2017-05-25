@@ -45,7 +45,7 @@ public class LoggingService {
 				}
 				writer.println();
 				writer.println("Statistika: ");
-				writer.println("Ukupno prijavljenih : " + nCount);
+				writer.println("Ukupno prijavljenih : " + n);
 				writer.println("	Broj navijaca: " + xCount + " | " + xCount
 						/ (double) n * 100 + "%");
 				writer.println("	Broj sportista: " + sCount + " | " + sCount

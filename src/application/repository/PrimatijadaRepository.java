@@ -14,7 +14,9 @@ import application.model.Primatijada;
 public interface PrimatijadaRepository {
 
 	public static final String TABLE_NAME = "primatijada";
-	public static final int TRY_COUNT_LIMIT = 5;
+	public static final int TRY_COUNT_LIMIT = 2;
+	public static final int TIMEOUT_INTERVAL = 0;
+	public static final String TIMEOUT = "SET CURRENT LOCK TIMEOUT " + TIMEOUT_INTERVAL + " ";
 
 	/*************************************** SQL *****************************************/
 	public static final String CREATE_TABLE_SQL = "create table "
@@ -22,11 +24,11 @@ public interface PrimatijadaRepository {
 			+ "( indeks integer not null,"
 			+ " godina int not null, tip char, sport varchar(20), rad varchar(100), aranzman char,"
 			+ " primary key(indeks, godina))";
-	public static final String INSERT_SQL = "insert into " + TABLE_NAME
+	public static final String INSERT_SQL =  "insert into " + TABLE_NAME
 			+ " values(?,?,?,?,?,?)";
 	public static final String DELETE_SQL = "delete from " + TABLE_NAME
 			+ " where indeks = ?";
-	public static final String UPDATE_SQL = "update "
+	public static final String UPDATE_SQL = " update "
 			+ TABLE_NAME
 			+ " SET tip = ?, sport = ?, rad = ?, aranzman = ?, godina = ? where indeks = ?";
 	public static final String EXISTS_SQL = "select * from " + TABLE_NAME
@@ -37,7 +39,7 @@ public interface PrimatijadaRepository {
 	public static final String COUNT_SQL = "select godina from " + TABLE_NAME
 			+ " where indeks = ? order by 1 desc";
 	public static final String RETRIVE_ALL_SQL = "select * from " + TABLE_NAME
-			+ " where godina = ? ";
+			+ " where godina = ? order by 3";
 
 	/***************************************************************************************/
 

@@ -1,10 +1,9 @@
 package application.service;
 
-
 import application.exception.DataBaseBusyException;
 import application.exception.EmptyInputException;
 import application.exception.IndeksFormatException;
-import application.exception.InvalidInputException;
+import application.exception.InvalidInputLengthException;
 import application.exception.InvalidInputFormatException;
 import application.exception.PrimaryKeyTakenException;
 import application.exception.RecordNotExistsException;
@@ -33,7 +32,6 @@ public class PrimatijadaService {
 	private static final String SCIENCE = "Naucnik";
 	private static final int BASE_PRICE = 110;
 
-
 	/**
 	 * @param validationService
 	 ******************************/
@@ -46,9 +44,11 @@ public class PrimatijadaService {
 	public void signUp(String indeksString, String category,
 			String arrangement, String options)
 			throws PrimaryKeyTakenException, NumberFormatException,
-			EmptyInputException, RecordNotExistsException,
-			DataBaseBusyException, IndeksFormatException,
-			InvalidInputFormatException {
+			EmptyInputException, DataBaseBusyException, IndeksFormatException,
+			InvalidInputFormatException, InvalidInputLengthException{
+		
+		validationService.checkIndeksFormat(indeksString);
+		validationService.checkOptionsInput(category, options);
 
 		int indeks = Integer.parseInt(indeksString);
 		Primatijada primatijada = new Primatijada();
@@ -69,15 +69,17 @@ public class PrimatijadaService {
 		} else {
 			primatijada.setTip('x');
 		}
-		validationService.check(primatijada);
-		repository.insert(primatijada);
+		if (!validationService.checkIfExists(primatijada))
+			repository.insert(primatijada);
+		else
+			throw new PrimaryKeyTakenException();
+		
 	}
-
 
 	public void updateRecord(String indeksString, String category,
 			String options) throws NumberFormatException,
 			RecordNotExistsException, IndeksFormatException,
-			EmptyInputException, InvalidInputException,
+			EmptyInputException, InvalidInputLengthException,
 			InvalidInputFormatException, DataBaseBusyException {
 
 		validationService.checkIndeksFormat(indeksString);
@@ -102,14 +104,13 @@ public class PrimatijadaService {
 
 	}
 
-
 	public void deleteRecord(String indeksString)
 			throws RecordNotExistsException, IndeksFormatException,
 			DataBaseBusyException, EmptyInputException {
 
 		validationService.checkIndeksFormat(indeksString);
-
-
+		validationService.checkIfIndeksExists(indeksString);
+		
 		int indeks = Integer.parseInt(indeksString);
 		repository.delete(indeks);
 	}
@@ -129,9 +130,9 @@ public class PrimatijadaService {
 	public float calculatePrice(String indeksText, String option,
 			String arrangement) throws IndeksFormatException,
 			DataBaseBusyException, EmptyInputException {
-		
+
 		validationService.checkIndeksFormat(indeksText);
-		
+
 		int indeks = Integer.parseInt(indeksText);
 		int count = 0;
 		try {
@@ -161,6 +162,7 @@ public class PrimatijadaService {
 	public float calculatePrice(String indeksText, String option)
 			throws IndeksFormatException, EmptyInputException,
 			RecordNotExistsException, DataBaseBusyException {
+		
 		validationService.checkIndeksFormat(indeksText);
 
 		int indeks = Integer.parseInt(indeksText);

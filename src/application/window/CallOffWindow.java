@@ -30,8 +30,8 @@ public class CallOffWindow extends Window {
 	private JLabel indeksErrorOutputLabel;
 	private JLabel errorOutputLabel;
 
-	public CallOffWindow(WindowController windowController, PrimatijadaService service,
-			ValidationService validationService) {
+	public CallOffWindow(WindowController windowController,
+			PrimatijadaService service, ValidationService validationService) {
 		this.windowController = windowController;
 		this.service = service;
 		this.validationService = validationService;
@@ -68,7 +68,7 @@ public class CallOffWindow extends Window {
 		frame.getContentPane().setLayout(null);
 
 		JPanel indeksPanel = new JPanel();
-		indeksPanel.setBounds(187, 80, 83, 29);
+		indeksPanel.setBounds(149, 80, 83, 29);
 		frame.getContentPane().add(indeksPanel);
 
 		JLabel indeksLabel = new JLabel("Indeks");
@@ -79,15 +79,34 @@ public class CallOffWindow extends Window {
 		frame.getContentPane().add(lblNewLabel);
 
 		JPanel indeksInputPanel = new JPanel();
-		indeksInputPanel.setBounds(346, 80, 183, 29);
+		indeksInputPanel.setBounds(261, 80, 183, 29);
 		frame.getContentPane().add(indeksInputPanel);
 
 		indeksInput = new JTextField();
 		indeksInputPanel.add(indeksInput);
 		indeksInput.setColumns(10);
-
+		indeksInput.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				
+				try {
+					validationService.checkIfIndeksExists(indeksInput.getText());
+				} catch (NumberFormatException e1) {
+					indeksErrorOutputLabel.setText(NUMBER_FORMAT_ERROR);
+				} catch (EmptyInputException e1) {
+					indeksErrorOutputLabel.setText(EMPTY_INPUT_ERROR);
+				} catch (RecordNotExistsException e1) {
+					indeksErrorOutputLabel.setText(INDEKS_NOT_EXISTS_ERROR);
+				} catch (DataBaseBusyException e1) {
+					errorOutputLabel.setForeground(Color.RED);
+					errorOutputLabel.setText(DATA_BASE_BUSY_ERROR);
+				} catch (IndeksFormatException e1) {
+					indeksErrorOutputLabel.setText(INVALID_INPUT_FORMAT);
+				}
+				
+			}
+		});
 		JPanel panel = new JPanel();
-		panel.setBounds(343, 154, 186, 36);
+		panel.setBounds(318, 180, 186, 36);
 		frame.getContentPane().add(panel);
 
 		JButton btnNewButton = new JButton("Odjavi se");
@@ -99,24 +118,30 @@ public class CallOffWindow extends Window {
 				 * When this method is envoked, it should pass to service
 				 * indeks, and catch potential exceptions
 				 */
+				errorOutputLabel.setForeground(Color.RED);
+				indeksErrorOutputLabel.setText("");
 
 				String indeks = indeksInput.getText();
 
 				try {
 					service.deleteRecord(indeks);
+					errorOutputLabel.setForeground(Color.GREEN);
+					errorOutputLabel.setText("Uspesno ste se odjavili!");
+				
 				} catch (NumberFormatException e1) {
-					indeksErrorOutputLabel.setText("Indeks not valid");
+					indeksErrorOutputLabel.setText(NUMBER_FORMAT_ERROR);
 				} catch (RecordNotExistsException e2) {
-					indeksErrorOutputLabel.setText("Indeks not found");
+					indeksErrorOutputLabel.setText(INDEKS_NOT_EXISTS_ERROR);
 				} catch (IndeksFormatException e1) {
-					indeksErrorOutputLabel.setText("Indeks not valid");
+					indeksErrorOutputLabel.setText(INVALID_INPUT_FORMAT);
 				} catch (DataBaseBusyException e1) {
+					errorOutputLabel.setForeground(Color.RED);
 					errorOutputLabel.setText(DATA_BASE_BUSY_ERROR);
 				} catch (EmptyInputException e1) {
 					indeksErrorOutputLabel.setText(EMPTY_INPUT_ERROR);
 				}
 
-				System.out.println("Odjavi se");
+				
 			}
 		});
 		panel.add(btnNewButton);
@@ -129,12 +154,12 @@ public class CallOffWindow extends Window {
 
 		indeksErrorOutputLabel = new JLabel("");
 		indeksErrorOutputLabel.setForeground(Color.RED);
-		indeksErrorOutputLabel.setBounds(346, 110, 183, 15);
+		indeksErrorOutputLabel.setBounds(292, 110, 276, 24);
 		frame.getContentPane().add(indeksErrorOutputLabel);
 
 		errorOutputLabel = new JLabel("");
 		errorOutputLabel.setForeground(Color.RED);
-		errorOutputLabel.setBounds(346, 202, 183, 15);
+		errorOutputLabel.setBounds(318, 237, 183, 15);
 		frame.getContentPane().add(errorOutputLabel);
 
 		frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
@@ -142,8 +167,10 @@ public class CallOffWindow extends Window {
 			@Override
 			public void windowClosing(WindowEvent e) {
 				String ObjButtons[] = { "Da", "Ne" };
-				int PromptResult = JOptionPane.showOptionDialog(null, "Da li ste sigurni ?", "",
-						JOptionPane.DEFAULT_OPTION, JOptionPane.WARNING_MESSAGE, null, ObjButtons, ObjButtons[1]);
+				int PromptResult = JOptionPane.showOptionDialog(null,
+						"Da li ste sigurni ?", "", JOptionPane.DEFAULT_OPTION,
+						JOptionPane.WARNING_MESSAGE, null, ObjButtons,
+						ObjButtons[1]);
 				if (PromptResult == JOptionPane.YES_OPTION) {
 					e.getWindow().dispose();
 					windowController.onWindowExit();

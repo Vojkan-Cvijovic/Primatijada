@@ -29,7 +29,11 @@ public class PrimatijadaRepositoryImplementation implements
 		connectionManager = new ConnectionManager();
 		Connection connection = connectionManager.connect();
 		try {
+			PreparedStatement preparedTimeout = connection
+					.prepareStatement(TIMEOUT);
 			Statement statement = connection.createStatement();
+
+			preparedTimeout.execute();
 			statement.execute("select * from " + TABLE_NAME);
 
 		} catch (SQLException e) {
@@ -51,8 +55,13 @@ public class PrimatijadaRepositoryImplementation implements
 
 		System.out.println("Creating table " + TABLE_NAME);
 		try {
+			PreparedStatement preparedTimeout = connection
+					.prepareStatement(TIMEOUT);
 			Statement statement = connection.createStatement();
+
+			preparedTimeout.execute();
 			statement.executeUpdate(CREATE_TABLE_SQL);
+
 			System.out.println("Table " + TABLE_NAME + " is created");
 		} catch (SQLException e) {
 			System.out.println("Error while creating table Error code "
@@ -87,7 +96,7 @@ public class PrimatijadaRepositoryImplementation implements
 			int times) throws SQLException, PrimaryKeyTakenException,
 			DataBaseBusyException {
 
-		if (times > TRY_COUNT_LIMIT) {
+		if (times >= TRY_COUNT_LIMIT) {
 			System.out
 					.println("reached maximum count of atempts to write in db");
 			throw new DataBaseBusyException();
@@ -96,6 +105,8 @@ public class PrimatijadaRepositoryImplementation implements
 		System.out.println("Preparing statement for insert operation");
 
 		try {
+			PreparedStatement preparedTimeout = connection
+					.prepareStatement(TIMEOUT);
 			PreparedStatement preparedStatement = connection
 					.prepareStatement(INSERT_SQL);
 
@@ -106,6 +117,7 @@ public class PrimatijadaRepositoryImplementation implements
 			preparedStatement.setString(5, model.getRad());
 			preparedStatement.setString(6, String.valueOf(model.getAranzman()));
 
+			preparedTimeout.execute();
 			preparedStatement.executeUpdate();
 
 		} catch (SQLException e) {
@@ -114,7 +126,7 @@ public class PrimatijadaRepositoryImplementation implements
 				System.out.println("ERROR SQLCODE: " + e.getErrorCode()
 						+ " Database busy, rollback and try again ...");
 				connection.rollback();
-				insertAction(model, connection, times++);
+				insertAction(model, connection, times + 1);
 
 			} else if (e.getErrorCode() == -803) {
 				throw new PrimaryKeyTakenException();
@@ -142,7 +154,7 @@ public class PrimatijadaRepositoryImplementation implements
 			throws SQLException, RecordNotExistsException,
 			DataBaseBusyException {
 
-		if (times > TRY_COUNT_LIMIT) {
+		if (times >= TRY_COUNT_LIMIT) {
 			System.out
 					.println("reached maximum count of atempts to write in db");
 			throw new DataBaseBusyException();
@@ -151,11 +163,14 @@ public class PrimatijadaRepositoryImplementation implements
 		System.out.println("Preparing statement for delete operation");
 
 		try {
+			PreparedStatement preparedTimeout = connection
+					.prepareStatement(TIMEOUT);
 			PreparedStatement preparedStatement = connection
 					.prepareStatement(DELETE_SQL);
 
 			preparedStatement.setInt(1, indeks);
 
+			preparedTimeout.execute();
 			preparedStatement.executeUpdate();
 
 		} catch (SQLException e) {
@@ -163,7 +178,7 @@ public class PrimatijadaRepositoryImplementation implements
 				System.out.println("ERROR SQLCODE: " + e.getErrorCode()
 						+ " Database busy, rollback and try again ...");
 				connection.rollback();
-				deleteAction(indeks, connection, times++);
+				deleteAction(indeks, connection, times + 1);
 			} else if (e.getErrorCode() == 100)
 				throw new RecordNotExistsException();
 
@@ -191,7 +206,7 @@ public class PrimatijadaRepositoryImplementation implements
 			int times) throws SQLException, RecordNotExistsException,
 			DataBaseBusyException {
 
-		if (times > TRY_COUNT_LIMIT) {
+		if (times >= TRY_COUNT_LIMIT) {
 			System.out
 					.println("reached maximum count of atempts to write in db");
 			throw new DataBaseBusyException();
@@ -199,6 +214,8 @@ public class PrimatijadaRepositoryImplementation implements
 
 		System.out.println("Preparing statement for update operation");
 		try {
+			PreparedStatement preparedTimeout = connection
+					.prepareStatement(TIMEOUT);
 			PreparedStatement preparedStatement = connection
 					.prepareStatement(UPDATE_SQL);
 
@@ -209,6 +226,7 @@ public class PrimatijadaRepositoryImplementation implements
 			preparedStatement.setInt(5, model.getGodina());
 			preparedStatement.setInt(6, model.getIndeks());
 
+			preparedTimeout.execute();
 			preparedStatement.executeUpdate();
 
 		} catch (SQLException e) {
@@ -216,7 +234,7 @@ public class PrimatijadaRepositoryImplementation implements
 				System.out.println("ERROR SQLCODE: " + e.getErrorCode()
 						+ " Database busy, rollback and try again ...");
 				connection.rollback();
-				updateAction(model, connection, times++);
+				updateAction(model, connection, times + 1);
 			} else if (e.getErrorCode() == 100)
 				throw new RecordNotExistsException();
 		}
@@ -245,7 +263,7 @@ public class PrimatijadaRepositoryImplementation implements
 			int times) throws SQLException, RecordNotExistsException,
 			DataBaseBusyException {
 
-		if (times > TRY_COUNT_LIMIT) {
+		if (times >= TRY_COUNT_LIMIT) {
 			System.out
 					.println("reached maximum count of atempts to write in db");
 
@@ -256,6 +274,8 @@ public class PrimatijadaRepositoryImplementation implements
 
 		Primatijada primatijada = new Primatijada();
 		try {
+			PreparedStatement preparedTimeout = connection
+					.prepareStatement(TIMEOUT);
 			PreparedStatement preparedStatement = connection
 					.prepareStatement(RETRIVE_SQL);
 
@@ -264,6 +284,7 @@ public class PrimatijadaRepositoryImplementation implements
 			int godina = Calendar.getInstance().get(Calendar.YEAR);
 			preparedStatement.setInt(2, godina);
 
+			preparedTimeout.execute();
 			ResultSet resultSet = preparedStatement.executeQuery();
 
 			if (resultSet.next()) {
@@ -274,16 +295,17 @@ public class PrimatijadaRepositoryImplementation implements
 				primatijada.setRad(resultSet.getString(5));
 				primatijada.setAranzman(resultSet.getString(6).charAt(0));
 			} else {
-				System.out.println("indeks " + indeks);
+				System.out.println("indeks" + indeks + " do not exists");
 				throw new RecordNotExistsException();
 
 			}
 		} catch (SQLException e) {
+
 			if (e.getErrorCode() == -911 || e.getErrorCode() == -913) {
 				System.out.println("ERROR SQLCODE: " + e.getErrorCode()
 						+ " Database busy, rollback and try again ...");
 				connection.rollback();
-				primatijada = retriveAction(indeks, connection, times++);
+				primatijada = retriveAction(indeks, connection, times + 1);
 			} else if (e.getErrorCode() == 100)
 				throw new RecordNotExistsException();
 		}
@@ -312,7 +334,7 @@ public class PrimatijadaRepositoryImplementation implements
 			int times) throws SQLException, DataBaseBusyException,
 			RecordNotExistsException {
 
-		if (times > TRY_COUNT_LIMIT) {
+		if (times >= TRY_COUNT_LIMIT) {
 			System.out
 					.println("Reached maximum count of atempts to write in db");
 			throw new DataBaseBusyException();
@@ -322,15 +344,17 @@ public class PrimatijadaRepositoryImplementation implements
 		int count = 0;
 
 		try {
+			PreparedStatement preparedTimeout = connection
+					.prepareStatement(TIMEOUT);
 			preparedStatement = connection.prepareStatement(COUNT_SQL);
 
 			preparedStatement.setInt(1, indeks);
 
+			preparedTimeout.execute();
 			ResultSet resultSet = preparedStatement.executeQuery();
 			System.out.println("executed query");
 			int godina = Calendar.getInstance().get(Calendar.YEAR);
 			while (resultSet.next()) {
-				System.out.println("Godina ");
 				int g = resultSet.getInt(1);
 				if (g != godina)
 					break;
@@ -349,7 +373,8 @@ public class PrimatijadaRepositoryImplementation implements
 						+ " Database busy, rollback and try again ...");
 
 				connection.rollback();
-				count = getCountOfRecordsAction(indeks, connection, times++);
+
+				count = getCountOfRecordsAction(indeks, connection, times + 1);
 
 			}
 		}
@@ -378,7 +403,7 @@ public class PrimatijadaRepositoryImplementation implements
 			Connection connection, int times) throws SQLException,
 			DataBaseBusyException {
 
-		if (times > TRY_COUNT_LIMIT) {
+		if (times >= TRY_COUNT_LIMIT) {
 			System.out
 					.println("Reached maximum count of atempts to write in db");
 			throw new DataBaseBusyException();
@@ -388,25 +413,27 @@ public class PrimatijadaRepositoryImplementation implements
 		List<Primatijada> list = null;
 
 		try {
+			PreparedStatement preparedTimeout = connection
+					.prepareStatement(TIMEOUT);
 			preparedStatement = connection.prepareStatement(RETRIVE_ALL_SQL);
 			int year = Calendar.getInstance().get(Calendar.YEAR);
 			preparedStatement.setInt(1, year);
 
+			preparedTimeout.execute();
 			ResultSet resultSet = preparedStatement.executeQuery();
 			list = new LinkedList<>();
 			while (resultSet.next()) {
 				// Loading model
 				System.out.println("Adding in list ");
 				Primatijada primatijada = new Primatijada();
-				
+
 				primatijada.setIndeks(resultSet.getInt(1));
 				primatijada.setGodina(resultSet.getInt(2));
 				primatijada.setTip(resultSet.getString(3).charAt(0));
 				primatijada.setSport(resultSet.getString(4));
 				primatijada.setRad(resultSet.getString(5));
 				primatijada.setAranzman(resultSet.getString(6).charAt(0));
-				
-				
+
 				System.out.println("adding indeks " + primatijada.getIndeks());
 				list.add(primatijada);
 			}
@@ -416,7 +443,7 @@ public class PrimatijadaRepositoryImplementation implements
 						+ " Database busy, rollback and try again ...");
 
 				connection.rollback();
-				list = retriceAllForCurrentYearAction(connection, times++);
+				list = retriceAllForCurrentYearAction(connection, times + 1);
 			}
 
 		}

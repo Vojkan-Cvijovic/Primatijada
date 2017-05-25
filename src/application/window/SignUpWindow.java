@@ -22,8 +22,8 @@ import javax.swing.JTextField;
 import application.exception.DataBaseBusyException;
 import application.exception.EmptyInputException;
 import application.exception.IndeksFormatException;
-import application.exception.InvalidInputException;
 import application.exception.InvalidInputFormatException;
+import application.exception.InvalidInputLengthException;
 import application.exception.PrimaryKeyTakenException;
 import application.exception.RecordNotExistsException;
 import application.service.PrimatijadaService;
@@ -36,9 +36,9 @@ public class SignUpWindow extends Window {
 	private JTextField indeksInput = null;
 	private ButtonGroup categoryRadioButtonGroup;
 	private JTextField optionInput;
-	private JLabel indeksInputErrorOutput;
-	private JLabel errorOutput;
-	private JLabel optionsInputErrorOutput;
+	private JLabel indeksInputErrorOutputLabel;
+	private JLabel errorOutputLabel;
+	private JLabel optionsInputErrorOutputLabel;
 	private JLabel priceOutputLabel;
 
 	private boolean showOptions = false;
@@ -61,8 +61,8 @@ public class SignUpWindow extends Window {
 		});
 	}
 
-	public SignUpWindow(WindowController windowController, PrimatijadaService service,
-			ValidationService validationService) {
+	public SignUpWindow(WindowController windowController,
+			PrimatijadaService service, ValidationService validationService) {
 		this.service = service;
 		this.windowController = windowController;
 		this.validationService = validationService;
@@ -92,27 +92,29 @@ public class SignUpWindow extends Window {
 			public void actionPerformed(ActionEvent e) {
 
 				String category = null;
+				errorOutputLabel.setText("");
 
 				// finds which radio button is selected
-				for (Enumeration<AbstractButton> buttons = categoryRadioButtonGroup.getElements(); buttons
-						.hasMoreElements();) {
+				for (Enumeration<AbstractButton> buttons = categoryRadioButtonGroup
+						.getElements(); buttons.hasMoreElements();) {
 					AbstractButton button = buttons.nextElement();
 
 					if (button.isSelected())
 						category = button.getText();
 
 				}
-				optionsInputErrorOutput.setText("");
+				optionsInputErrorOutputLabel.setText("");
 
 				try {
-					validationService.checkOptionsInput(category, optionInput.getText());
+					validationService.checkOptionsInput(category,
+							optionInput.getText());
 
 				} catch (EmptyInputException e1) {
-					optionsInputErrorOutput.setText(EMPTY_INPUT_ERROR);
-				} catch (InvalidInputException e1) {
-					optionsInputErrorOutput.setText(INPUT_TOO_LONG);
+					optionsInputErrorOutputLabel.setText(EMPTY_INPUT_ERROR);
+				} catch (InvalidInputLengthException e1) {
+					optionsInputErrorOutputLabel.setText(INPUT_TOO_LONG);
 				} catch (InvalidInputFormatException e1) {
-					optionsInputErrorOutput.setText(INVALID_INPUT_FORMAT);
+					optionsInputErrorOutputLabel.setText(INVALID_INPUT_FORMAT);
 				}
 
 			}
@@ -137,51 +139,30 @@ public class SignUpWindow extends Window {
 		indeksInput.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 
-				indeksInputErrorOutput.setText("");
-				errorOutput.setText("");
+				indeksInputErrorOutputLabel.setText("");
+				errorOutputLabel.setText("");
 
-				String indeks = indeksInput.getText();
-				String category = null;
-				String arrangement = null;
-
-				// finds which radio button is selected
-				for (Enumeration<AbstractButton> buttons = categoryRadioButtonGroup.getElements(); buttons
-						.hasMoreElements();) {
-					AbstractButton button = buttons.nextElement();
-
-					if (button.isSelected())
-						category = button.getText();
-
-				}
-
-				// finds which radio button is selected
-				for (Enumeration<AbstractButton> buttons = arrangementButtonGroup.getElements(); buttons
-						.hasMoreElements();) {
-					AbstractButton button = buttons.nextElement();
-
-					if (button.isSelected())
-						arrangement = button.getText();
-
-				}
 				boolean exists = false;
+
 				try {
-					exists = validationService.checkIfIndeksExists(indeksInput.getText());
-					float price = service.calculatePrice(indeks, category, arrangement);
+					exists = validationService.checkIfIndeksExists(indeksInput
+							.getText());
+
 					if (exists) {
-						indeksInputErrorOutput.setText(INDEKS_TAKEN_ERROR);
+						indeksInputErrorOutputLabel.setText(INDEKS_TAKEN_ERROR);
 					}
 
 				} catch (NumberFormatException e1) {
-					indeksInputErrorOutput.setText(NUMBER_FORMAT_ERROR);
+					indeksInputErrorOutputLabel.setText(NUMBER_FORMAT_ERROR);
 				} catch (EmptyInputException e1) {
-					indeksInputErrorOutput.setText(EMPTY_INPUT_ERROR);
+					indeksInputErrorOutputLabel.setText(EMPTY_INPUT_ERROR);
 				} catch (RecordNotExistsException e1) {
 					updatePrice();
 				} catch (DataBaseBusyException e1) {
-
-					errorOutput.setText(DATA_BASE_BUSY_ERROR);
+					errorOutputLabel.setForeground(Color.RED);
+					errorOutputLabel.setText(DATA_BASE_BUSY_ERROR);
 				} catch (IndeksFormatException e1) {
-					indeksInputErrorOutput.setText(INVALID_INPUT_FORMAT);
+					indeksInputErrorOutputLabel.setText(INVALID_INPUT_FORMAT);
 				}
 
 			}
@@ -204,6 +185,7 @@ public class SignUpWindow extends Window {
 				showOptions = false;
 				optionLabel.setVisible(showOptions);
 				optionInput.setVisible(showOptions);
+				optionInput.setText("");
 
 				updatePrice();
 
@@ -221,7 +203,7 @@ public class SignUpWindow extends Window {
 				optionLabel.setText(SPORT_LABEL);
 				optionInput.setVisible(showOptions);
 				optionInput.setColumns(SHORT_OPTION_WIDTH);
-
+				optionInput.setText("");
 				updatePrice();
 			}
 		});
@@ -236,6 +218,7 @@ public class SignUpWindow extends Window {
 				optionLabel.setText(PAPERWORK_LABEL);
 				optionInput.setVisible(showOptions);
 				optionInput.setColumns(LONG_OPTION_WIDTH);
+				optionInput.setText("");
 
 				updatePrice();
 
@@ -323,10 +306,13 @@ public class SignUpWindow extends Window {
 				String category = null;
 				String arrangement = null;
 				String options = optionInput.getText();
+				errorOutputLabel.setText("");
+				indeksInputErrorOutputLabel.setText("");
+				optionsInputErrorOutputLabel.setText("");
 
 				// finds which radio button is selected
-				for (Enumeration<AbstractButton> buttons = categoryRadioButtonGroup.getElements(); buttons
-						.hasMoreElements();) {
+				for (Enumeration<AbstractButton> buttons = categoryRadioButtonGroup
+						.getElements(); buttons.hasMoreElements();) {
 					AbstractButton button = buttons.nextElement();
 
 					if (button.isSelected())
@@ -335,8 +321,8 @@ public class SignUpWindow extends Window {
 				}
 
 				// finds which radio button is selected
-				for (Enumeration<AbstractButton> buttons = arrangementButtonGroup.getElements(); buttons
-						.hasMoreElements();) {
+				for (Enumeration<AbstractButton> buttons = arrangementButtonGroup
+						.getElements(); buttons.hasMoreElements();) {
 					AbstractButton button = buttons.nextElement();
 
 					if (button.isSelected())
@@ -347,22 +333,33 @@ public class SignUpWindow extends Window {
 				try {
 					service.signUp(indeks, category, arrangement, options);
 
-					float price = service.calculatePrice(indeks, category, arrangement);
-					priceOutputLabel.setText(price + " din");
-
+					float price = service.calculatePrice(indeks, category,
+							arrangement);
+					priceOutputLabel.setText(price + " $");
+					errorOutputLabel.setForeground(Color.GREEN);
+					errorOutputLabel.setText("Uspesno ste se prijavili!");
+					
 				} catch (PrimaryKeyTakenException e1) {
-					indeksInputErrorOutput.setText(INDEKS_TAKEN_ERROR);
+					indeksInputErrorOutputLabel.setText(INDEKS_TAKEN_ERROR);
 				} catch (NumberFormatException e2) {
-					indeksInputErrorOutput.setText(NUMBER_FORMAT_ERROR);
+					indeksInputErrorOutputLabel.setText(NUMBER_FORMAT_ERROR);
 				} catch (EmptyInputException e1) {
-				} catch (RecordNotExistsException e1) {
+					if (indeks.trim().equalsIgnoreCase(""))
+						indeksInputErrorOutputLabel.setText(EMPTY_INPUT_ERROR);
+
+					if (!category.equalsIgnoreCase("Navijac")
+							&& options.trim().equalsIgnoreCase(""))
+						optionsInputErrorOutputLabel.setText(EMPTY_INPUT_ERROR);
 				} catch (DataBaseBusyException e1) {
-					errorOutput.setText(DATA_BASE_BUSY_ERROR);
+					errorOutputLabel.setForeground(Color.RED);
+					errorOutputLabel.setText(DATA_BASE_BUSY_ERROR);
 				} catch (IndeksFormatException e1) {
-					indeksInputErrorOutput.setText(INVALID_INPUT_FORMAT);
+					indeksInputErrorOutputLabel.setText(INVALID_INPUT_FORMAT);
 				} catch (InvalidInputFormatException e1) {
-					indeksInputErrorOutput.setText(INVALID_INPUT_FORMAT);
-				}
+					optionsInputErrorOutputLabel.setText(INVALID_INPUT_FORMAT);
+				} catch (InvalidInputLengthException e1) {
+					optionsInputErrorOutputLabel.setText(INPUT_TOO_LONG);
+				} 
 			}
 		});
 		signupPanel.add(signupButton);
@@ -395,27 +392,29 @@ public class SignUpWindow extends Window {
 		edit.setBounds(501, 43, 83, 25);
 		frame.getContentPane().add(edit);
 
-		indeksInputErrorOutput = new JLabel("");
-		indeksInputErrorOutput.setForeground(Color.RED);
-		indeksInputErrorOutput.setBounds(245, 67, 223, 24);
-		frame.getContentPane().add(indeksInputErrorOutput);
+		indeksInputErrorOutputLabel = new JLabel("");
+		indeksInputErrorOutputLabel.setForeground(Color.RED);
+		indeksInputErrorOutputLabel.setBounds(245, 67, 223, 24);
+		frame.getContentPane().add(indeksInputErrorOutputLabel);
 
-		optionsInputErrorOutput = new JLabel("");
-		optionsInputErrorOutput.setForeground(Color.RED);
-		optionsInputErrorOutput.setBounds(313, 241, 126, 15);
-		frame.getContentPane().add(optionsInputErrorOutput);
+		optionsInputErrorOutputLabel = new JLabel("");
+		optionsInputErrorOutputLabel.setForeground(Color.RED);
+		optionsInputErrorOutputLabel.setBounds(313, 241, 230, 15);
+		frame.getContentPane().add(optionsInputErrorOutputLabel);
 
-		errorOutput = new JLabel("");
-		errorOutput.setBounds(394, 326, 142, 15);
-		frame.getContentPane().add(errorOutput);
+		errorOutputLabel = new JLabel("");
+		errorOutputLabel.setBounds(394, 326, 200, 15);
+		frame.getContentPane().add(errorOutputLabel);
 
 		frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		frame.addWindowListener(new WindowAdapter() {
 			@Override
 			public void windowClosing(WindowEvent e) {
 				String ObjButtons[] = { "Da", "Ne" };
-				int PromptResult = JOptionPane.showOptionDialog(null, "Da li ste sigurni ?", "",
-						JOptionPane.DEFAULT_OPTION, JOptionPane.WARNING_MESSAGE, null, ObjButtons, ObjButtons[1]);
+				int PromptResult = JOptionPane.showOptionDialog(null,
+						"Da li ste sigurni ?", "", JOptionPane.DEFAULT_OPTION,
+						JOptionPane.WARNING_MESSAGE, null, ObjButtons,
+						ObjButtons[1]);
 				if (PromptResult == JOptionPane.YES_OPTION) {
 					e.getWindow().dispose();
 					windowController.onWindowExit();
@@ -436,7 +435,8 @@ public class SignUpWindow extends Window {
 		String arrangement = null;
 
 		// finds which radio button is selected
-		for (Enumeration<AbstractButton> buttons = categoryRadioButtonGroup.getElements(); buttons.hasMoreElements();) {
+		for (Enumeration<AbstractButton> buttons = categoryRadioButtonGroup
+				.getElements(); buttons.hasMoreElements();) {
 			AbstractButton button = buttons.nextElement();
 
 			if (button.isSelected())
@@ -445,7 +445,8 @@ public class SignUpWindow extends Window {
 		}
 
 		// finds which radio button is selected
-		for (Enumeration<AbstractButton> buttons = arrangementButtonGroup.getElements(); buttons.hasMoreElements();) {
+		for (Enumeration<AbstractButton> buttons = arrangementButtonGroup
+				.getElements(); buttons.hasMoreElements();) {
 			AbstractButton button = buttons.nextElement();
 
 			if (button.isSelected())
@@ -458,11 +459,13 @@ public class SignUpWindow extends Window {
 			price = service.calculatePrice(indeks, category, arrangement);
 			priceOutputLabel.setText(price + " $");
 		} catch (IndeksFormatException e1) {
-			indeksInputErrorOutput.setText(INVALID_INPUT_FORMAT);
+			indeksInputErrorOutputLabel.setText(INVALID_INPUT_FORMAT);
 		} catch (DataBaseBusyException e1) {
-			errorOutput.setText(DATA_BASE_BUSY_ERROR);
+			
+			errorOutputLabel.setForeground(Color.RED);
+			errorOutputLabel.setText(DATA_BASE_BUSY_ERROR);
 		} catch (EmptyInputException e1) {
-			indeksInputErrorOutput.setText(EMPTY_INPUT_ERROR);
+			indeksInputErrorOutputLabel.setText(EMPTY_INPUT_ERROR);
 		}
 
 	}
