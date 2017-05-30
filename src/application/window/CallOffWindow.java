@@ -8,15 +8,21 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.JButton;
 
+import application.exception.RecordNotExistsException;
+import application.model.Primatijada;
 import application.service.PrimatijadaService;
 
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 
+
+import com.ibm.db2.jcc.am.de;
+
 public class CallOffWindow extends Window {
 
 	private WindowController windowController;
 	private JFrame frame;
+	private JTextField indeksInput;
 	
 	public CallOffWindow(WindowController windowController, PrimatijadaService service) {
 		this.windowController = windowController;
@@ -66,8 +72,8 @@ public class CallOffWindow extends Window {
 		JPanel indeksInputPanel = new JPanel();
 		indeksInputPanel.setBounds(346, 80, 183, 29);
 		frame.getContentPane().add(indeksInputPanel);
-
-		JTextField indeksInput = new JTextField();
+		
+		indeksInput = new JTextField();
 		indeksInputPanel.add(indeksInput);
 		indeksInput.setColumns(10);
 
@@ -83,6 +89,16 @@ public class CallOffWindow extends Window {
 				/* When this method is envoked, it should pass to service indeks,
 				 * and catch potentioal exceptions
 				 */
+
+				String indeks = indeksInput.getText();
+				
+				try{
+					service.deleteRecord(indeks);	
+				} catch (NumberFormatException e1) {
+					System.out.println("ERROR: Indeks not valid");
+				} catch (RecordNotExistsException e1) {
+					System.out.println("ERROR: Indeks not found");
+				}
 				
 				
 				System.out.println("Odjavi se");
