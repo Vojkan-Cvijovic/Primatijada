@@ -15,7 +15,7 @@ import java.awt.event.ActionEvent;
 import java.util.Enumeration;
 
 import javax.swing.JButton;
-
+import application.repository.PrimatijadaRepositoryImplementation;
 import application.exception.PrimaryKeyTakenException;
 import application.service.PrimatijadaService;
 
@@ -26,7 +26,8 @@ public class SignUpWindow extends Window {
 	private JTextField indeksInput;
 	private ButtonGroup categoryRadioButtonGroup;
 	private JTextField optionInput;
-
+	private JTextField godinaInput;
+	
 	private boolean showOptions = false;
 	private static final int SHORT_OPTION_WIDTH = 10;
 	private static final int LONG_OPTION_WIDTH = 20;
@@ -195,6 +196,22 @@ public class SignUpWindow extends Window {
 		
 		/* ---------------------- */
 
+		JPanel godinaPanel = new JPanel();
+		godinaPanel.setBounds(95, 220, 83, 29);
+		frame.getContentPane().add(godinaPanel);
+
+		JLabel godinaLabel = new JLabel("Godina");
+		godinaPanel.add(godinaLabel);
+
+		JPanel godinaInputPanel = new JPanel();
+		godinaInputPanel.setBounds(256, 220, 183, 29);
+		frame.getContentPane().add(godinaInputPanel);
+				
+		godinaInput =  new JTextField();
+		
+		godinaInputPanel.add(godinaInput);
+		godinaInput.setColumns(10);
+						
 		JPanel signupPanel = new JPanel();
 		signupPanel.setBounds(353, 258, 183, 45);
 		frame.getContentPane().add(signupPanel);
@@ -209,6 +226,7 @@ public class SignUpWindow extends Window {
 				String category = null;
 				String arrangement = null;
 				String options = optionInput.getText();
+				String godina  = godinaInput.getText();
 				
 				// finds which radio button is selected
 				for (Enumeration<AbstractButton> buttons = categoryRadioButtonGroup
@@ -217,6 +235,7 @@ public class SignUpWindow extends Window {
 
 					if (button.isSelected())
 						category = button.getText();
+						
 				}
 				
 				// finds which radio button is selected
@@ -226,15 +245,37 @@ public class SignUpWindow extends Window {
 
 					if (button.isSelected())
 						arrangement = button.getText();
+						
 				}
 				// Validation
 				try {
-					service.signUp(indeks, category, arrangement, options);
+					service.signUp(indeks, category, arrangement, godina, options);
 				} catch (PrimaryKeyTakenException e1) {
 					System.out.println("ERROR: Index is taken");
 				} catch (NumberFormatException e2) {
 					System.out.println("ERROR: Index is not number");
 				}
+				
+				PrimatijadaRepositoryImplementation pri = new PrimatijadaRepositoryImplementation();
+				float price = pri.countingPrice(category, arrangement, godina);
+				System.out.println(price);
+				
+				JFrame prozor = new JFrame();
+				prozor.setResizable(false);
+				prozor.setBounds(100,100,200,200);
+				prozor.setTitle("Cena");
+				prozor.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+				prozor.setVisible(true);
+				
+				JPanel pricePanel = new JPanel();
+				pricePanel.setBounds(200, 200, 83, 29);
+				prozor.getContentPane().add(pricePanel);
+				
+				String cena = String.valueOf(price);
+				JLabel priceLabel = new JLabel("Cena je: " + cena);
+				pricePanel.add(priceLabel);
+				prozor.add(pricePanel);
+				
 			}
 		});
 		signupPanel.add(signupButton);

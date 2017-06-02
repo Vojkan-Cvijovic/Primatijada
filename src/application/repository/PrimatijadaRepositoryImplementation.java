@@ -87,14 +87,15 @@ public class PrimatijadaRepositoryImplementation implements
 					.prepareStatement(INSERT_SQL);
 
 			preparedStatement.setInt(1, model.getIndeks());
-			preparedStatement.setShort(2, model.getGodina());
+			preparedStatement.setInt(2, model.getGodina());
 			preparedStatement.setString(3, String.valueOf(model.getTip()));
 			preparedStatement.setString(4, model.getSport());
 			preparedStatement.setString(5, model.getRad());
 			preparedStatement.setString(6, String.valueOf(model.getAranzman()));
 
 			preparedStatement.executeUpdate();
-
+			
+			
 		} catch (SQLException e) {
 
 			if (e.getErrorCode() == -911 || e.getErrorCode() == -913) {
@@ -176,10 +177,13 @@ public class PrimatijadaRepositoryImplementation implements
 			preparedStatement.setString(1, String.valueOf(model.getTip()));
 			preparedStatement.setString(2, model.getSport());
 			preparedStatement.setString(3, model.getRad());
-			preparedStatement.setInt(4, model.getIndeks());
+			preparedStatement.setString(4, String.valueOf(model.getAranzman()));
+			preparedStatement.setInt(5, model.getGodina());
+			preparedStatement.setInt(6, model.getIndeks());
 
 			preparedStatement.executeUpdate();
-
+			
+			
 		} catch (SQLException e) {
 			if (e.getErrorCode() == -911 || e.getErrorCode() == -913) {
 				System.out.println("ERROR SQLCODE: " + e.getErrorCode()
@@ -233,6 +237,72 @@ public class PrimatijadaRepositoryImplementation implements
 				throw new RecordNotExistsException();
 		}
 		return category;
+	}
+	
+	public float countingPrice(String tip1,String aranzman1,String godina1){
+		
+		float cena = 0;
+		char tip = tip1.charAt(0);
+		char aranzman = aranzman1.charAt(0);
+		int godina = Integer.parseInt(godina1);
+		
+		if(tip == 's'){
+			if(aranzman == 'c'){
+				cena = 110 * 30 / 100;
+				if(godina == 2){
+					cena -= cena * 5 / 100; 
+				} else if(godina > 2 ){
+					cena -= cena * 10 / 100;
+				}
+			}
+			else{
+				cena = (110 * 30 / 100) / 2;
+				if(godina == 2){
+					cena -= cena * 5 / 100;
+				} else if(godina > 2){
+					cena -= cena * 10 / 100;
+				}
+			}
+		} else if(tip == 'n'){
+			if(aranzman == 'c'){
+				cena = 110 * 30 / 100;
+				if(godina == 2){
+					cena -= cena * 5 / 100; 
+				} else if(godina > 2 ){
+					cena -= cena * 10 / 100;
+				}
+			}
+			else{
+				cena = (110 * 30 / 100) / 2;
+				if(godina == 2){
+					cena -= cena * 5 / 100;
+				} else if(godina > 2){
+					cena -= cena * 10 / 100;
+				}
+			}
+		} else{
+			if(aranzman == 'c'){
+				cena = 110;
+				if(godina == 2){
+					cena -= cena * 5 / 100;
+				}
+				else{
+					if(godina > 2){
+						cena -= cena *10 / 100;
+					}
+				}
+			}
+			else{
+				cena = 110 / 2;
+				if(godina == 2){
+					cena -= cena * 5 /100;
+				} else if(godina > 2){
+					cena -= cena * 10 /100;
+				}
+			}
+		}
+		
+		return cena;
 	}
 
 }

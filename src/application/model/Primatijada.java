@@ -7,7 +7,7 @@ package application.model;
 public class Primatijada {
 	
 	private int indeks; // not null
-	private short godina;
+	private int godina;
 	private char tip; // s- sportisti, n-naucnici, x-navijaci
 	private String sport;
 	private String rad;
@@ -48,11 +48,11 @@ public class Primatijada {
 		this.indeks = indeks;
 	}
 
-	public short getGodina() {
+	public int getGodina() {
 		return godina;
 	}
 
-	public void setGodina(short godina) {
+	public void setGodina(int godina) {
 		this.godina = godina;
 	}
 

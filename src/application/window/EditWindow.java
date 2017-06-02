@@ -14,6 +14,7 @@ import javax.swing.JRadioButton;
 import javax.swing.JSeparator;
 import javax.swing.JTextField;
 import application.exception.RecordNotExistsException;
+import application.repository.PrimatijadaRepositoryImplementation;
 import application.service.PrimatijadaService;
 
 public class EditWindow extends Window {
@@ -24,6 +25,7 @@ public class EditWindow extends Window {
 	private ButtonGroup buttonGroup;
 	private JTextField optionInput;
 	private JLabel optionLabel;
+	private JTextField godinaInput;
 
 	private boolean showOptions = false;
 	private static final int SHORT_OPTION_WIDTH = 10;
@@ -31,6 +33,8 @@ public class EditWindow extends Window {
 	private int optionInputWidth = SHORT_OPTION_WIDTH;
 	private static final String SPORT_LABEL = "Sport";
 	private static final String PAPERWORK_LABEL = "Rad";
+	private ButtonGroup arrangementButtonGroup = new ButtonGroup();
+
 
 	/**
 	 * Create the application.
@@ -58,6 +62,7 @@ public class EditWindow extends Window {
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.getContentPane().setLayout(null);
 
+		
 		optionLabel = new JLabel("");
 		final JPanel optionInputPanel = new JPanel();
 		optionInput = new JTextField();
@@ -114,7 +119,7 @@ public class EditWindow extends Window {
 		indeksInput.setColumns(10);
 
 		JPanel categoryPanel = new JPanel();
-		categoryPanel.setBounds(256, 110, 280, 29);
+		categoryPanel.setBounds(256, 130, 280, 29);
 		frame.getContentPane().add(categoryPanel);
 
 		buttonGroup = new ButtonGroup();
@@ -153,7 +158,7 @@ public class EditWindow extends Window {
 		frame.getContentPane().add(separator);
 
 		JPanel categoryLabelPanel = new JPanel();
-		categoryLabelPanel.setBounds(120, 110, 103, 29);
+		categoryLabelPanel.setBounds(120, 130, 103, 29);
 		frame.getContentPane().add(categoryLabelPanel);
 
 		JLabel categoryLabel = new JLabel("Kategorija");
@@ -163,6 +168,8 @@ public class EditWindow extends Window {
 		optionLabelPanel.setBounds(95, 164, 103, 21);
 		frame.getContentPane().add(optionLabelPanel);
 
+		
+		
 		optionLabelPanel.add(optionLabel);
 		optionLabel.setVisible(showOptions);
 
@@ -179,6 +186,44 @@ public class EditWindow extends Window {
 		frame.getContentPane().add(backButton);
 		backButton.addActionListener(windowController);
 
+		JPanel arrangementPanel = new JPanel();
+		arrangementPanel.setBounds(95, 90, 103, 29);
+		frame.getContentPane().add(arrangementPanel);
+				
+		JLabel arrangementLabel = new JLabel("Aranzman");
+		arrangementPanel.add(arrangementLabel);
+				
+		JPanel arrangementOptionPanel = new JPanel();
+		arrangementOptionPanel.setBounds(258, 85, 183, 28);
+		frame.getContentPane().add(arrangementOptionPanel);
+
+		JRadioButton arrangementOptionRB_1 = new JRadioButton("Ceo");
+		arrangementOptionRB_1.setSelected(true);
+		arrangementButtonGroup.add(arrangementOptionRB_1);
+		arrangementOptionPanel.add(arrangementOptionRB_1);
+
+		JRadioButton arrangementOptionRB_2 = new JRadioButton("Pola");
+		arrangementButtonGroup.add(arrangementOptionRB_2);
+		arrangementOptionPanel.add(arrangementOptionRB_2);
+		
+		
+		
+		JPanel godinaPanel = new JPanel();
+		godinaPanel.setBounds(200, 200, 83, 29);
+		frame.getContentPane().add(godinaPanel);
+
+		JLabel godinaLabel = new JLabel("Godina");
+		godinaPanel.add(godinaLabel);
+
+		JPanel godinaInputPanel = new JPanel();
+		godinaInputPanel.setBounds(256, 200, 183, 29);
+		frame.getContentPane().add(godinaInputPanel);
+				
+		godinaInput =  new JTextField();
+		
+		godinaInputPanel.add(godinaInput);
+		godinaInput.setColumns(10); 
+		
 		JPanel panel = new JPanel();
 		panel.setBounds(245, 234, 223, 39);
 		frame.getContentPane().add(panel);
@@ -195,7 +240,10 @@ public class EditWindow extends Window {
 				String indeks = indeksInput.getText();
 				String category = null;
 				String options = optionInput.getText();
-
+				String arrangement = null;
+				String godina = godinaInput.getText();
+				
+				
 				for (Enumeration<AbstractButton> buttons = buttonGroup
 						.getElements(); buttons.hasMoreElements();) {
 					AbstractButton button = buttons.nextElement();
@@ -203,15 +251,46 @@ public class EditWindow extends Window {
 					if (button.isSelected())
 						category = button.getText();
 				}
+				
+				for (Enumeration<AbstractButton> buttons = arrangementButtonGroup
+						.getElements(); buttons.hasMoreElements();) {
+					AbstractButton button = buttons.nextElement();
+
+					if (button.isSelected())
+						arrangement = button.getText();
+						
+				}
+
+				
 				// Validation
 				try {
-					service.updateRecord(indeks, category, options);
+					service.updateRecord(indeks, category, arrangement, godina, options);
 				} catch (NumberFormatException e1) {
 					System.out.println("ERROR: Indeks not valid");
 				} catch (RecordNotExistsException e1) {
 					System.out.println("ERROR: Indeks not found");
 				}
 
+				PrimatijadaRepositoryImplementation pri = new PrimatijadaRepositoryImplementation();
+				float price = pri.countingPrice(category, arrangement, godina);
+				System.out.println(price);
+				
+				JFrame prozor = new JFrame();
+				prozor.setResizable(false);
+				prozor.setBounds(100,100,200,200);
+				prozor.setTitle("Cena");
+				prozor.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+				prozor.setVisible(true);
+
+				JPanel pricePanel = new JPanel();
+				pricePanel.setBounds(200, 200, 83, 29);
+				prozor.getContentPane().add(pricePanel);
+				
+				String cena = String.valueOf(price);
+				JLabel priceLabel = new JLabel(cena);
+				pricePanel.add(priceLabel);
+				prozor.add(pricePanel);
+				
 			}
 		});
 		panel.add(updateButton);
@@ -235,12 +314,14 @@ public class EditWindow extends Window {
 
 	}
 
-	private void sportOption() {
+	private void sportOption() {		
+		
 		showOptions = true;
 		optionLabel.setVisible(showOptions);
 		optionLabel.setText(SPORT_LABEL);
 		optionInput.setVisible(showOptions);
 		optionInput.setColumns(SHORT_OPTION_WIDTH);
+		
 	}
 
 	private void scienceOption() {
